@@ -1,0 +1,62 @@
+{
+ "schema": "corvus.batch/1",
+ "corvus": "2.5.1",
+ "file": {
+  "path": "/tmp/corvus/zeros.bin",
+  "size": 4096,
+  "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+  "type": "data"
+ },
+ "complete": true,
+ "limits": {
+  "timeSeconds": 120,
+  "containerFiles": 500,
+  "strings": 500,
+  "yaraMatches": 500,
+  "summaryHighlights": 25
+ },
+ "sections": [
+  {
+   "name": "summary",
+   "tool": "summarize_file",
+   "status": "complete",
+   "result": {
+    "path": "/tmp/corvus/zeros.bin",
+    "size": 4096,
+    "type": "data",
+    "sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+    "container": "none",
+    "view": "overview",
+    "views": [
+     "overview",
+     "all"
+    ],
+    "md5": "620f0b67a91f7f74151bc5be745b7110",
+    "sha1": "1ceaf73df40e531df3bfb26b4fb7cd95fb7bff1d",
+    "entropy": 0,
+    "notes": [
+     "Not a known container (data) and no embedded .NET images were found.",
+     "No managed assemblies inside: nothing to summarize beyond the file facts."
+    ]
+   }
+  },
+  {
+   "name": "container",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "The file is not a container."
+  },
+  {
+   "name": "strings",
+   "tool": "extract_strings",
+   "status": "not_applicable",
+   "reason": "Typed strings are read from .NET assemblies."
+  },
+  {
+   "name": "yara",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "No rules were given; --rules names a rule file or folder."
+  }
+ ]
+}

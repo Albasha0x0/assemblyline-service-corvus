@@ -1,0 +1,142 @@
+{
+ "schema": "corvus.batch/1",
+ "corvus": "2.5.1",
+ "file": {
+  "path": "/tmp/corvus/hello-bundle.exe",
+  "size": 168932,
+  "sha256": "d90d08780080dab3d1bbaaa52f8b371887bb2b328ff0726b28d26e6d97601b83",
+  "type": "native PE"
+ },
+ "complete": true,
+ "limits": {
+  "timeSeconds": 120,
+  "containerFiles": 500,
+  "strings": 500,
+  "yaraMatches": 500,
+  "summaryHighlights": 25
+ },
+ "sections": [
+  {
+   "name": "summary",
+   "tool": "summarize_file",
+   "status": "complete",
+   "result": {
+    "path": "/tmp/corvus/hello-bundle.exe",
+    "size": 168932,
+    "type": "native PE",
+    "sha256": "d90d08780080dab3d1bbaaa52f8b371887bb2b328ff0726b28d26e6d97601b83",
+    "container": ".NET single-file bundle",
+    "view": "overview",
+    "views": [
+     "overview",
+     "managed",
+     "all"
+    ],
+    "md5": "94c7956ebae18107e071f7794c370dec",
+    "sha1": "7ee8d5747a47c7c42c5d9aab19429096c2393e93",
+    "entropy": 6.06,
+    "assemblies": [
+     {
+      "path": "Hello.dll",
+      "name": "Hello",
+      "kind": "console application",
+      "architecture": "x64",
+      "features": 0,
+      "version": "1.0.0.0",
+      "framework": ".NETCoreApp,Version=v10.0"
+     }
+    ],
+    "highlights": [
+     "Network values: 1 url, 1 domain."
+    ],
+    "entryPoints": [
+     "Main: Hello.Program::Main()"
+    ],
+    "values": {
+     "url": 1,
+     "domain": 1
+    },
+    "notes": [
+     "Single-file bundle v6.0, id zwMCnDl4MUYs, 3 files."
+    ]
+   }
+  },
+  {
+   "name": "container",
+   "tool": "search_container",
+   "status": "complete",
+   "result": {
+    "source": "/tmp/corvus/hello-bundle.exe",
+    "container": ".NET single-file bundle",
+    "searched": 3,
+    "items": [
+     {
+      "path": "Hello.dll",
+      "name": "Hello.dll",
+      "kind": "file",
+      "detail": ".NET assembly, 4,096 bytes"
+     },
+     {
+      "path": "Hello.runtimeconfig.json",
+      "name": "Hello.runtimeconfig.json",
+      "kind": "file",
+      "detail": "text, 342 bytes"
+     },
+     {
+      "path": "Hello.deps.json",
+      "name": "Hello.deps.json",
+      "kind": "file",
+      "detail": "text, 463 bytes"
+     }
+    ],
+    "offset": 0,
+    "total": 3,
+    "notes": [
+     "Single-file bundle v6.0, id zwMCnDl4MUYs, 3 files."
+    ],
+    "limit": 500,
+    "totalExact": true,
+    "hasMore": false
+   }
+  },
+  {
+   "name": "strings",
+   "tool": "extract_strings",
+   "status": "not_applicable",
+   "reason": "Typed strings are read from .NET assemblies."
+  },
+  {
+   "name": "yara",
+   "tool": "search_container",
+   "status": "complete",
+   "result": {
+    "source": "/tmp/corvus/hello-bundle.exe",
+    "container": "file",
+    "searched": 4,
+    "items": [
+     {
+      "path": "/tmp/corvus/hello-bundle.exe",
+      "name": "names_the_endpoint",
+      "kind": "yara",
+      "detail": "$u at 0x286EA+42"
+     },
+     {
+      "path": "Hello.dll",
+      "name": "names_the_endpoint",
+      "kind": "yara",
+      "detail": "$u at 0x6EA+42"
+     }
+    ],
+    "offset": 0,
+    "total": 2,
+    "notes": [
+     "YARA-X 1.22.0: 3 rules from 1 file; 3 container members scanned; at most 100 matches kept per pattern; 87 ms",
+     "Single-file bundle v6.0, id zwMCnDl4MUYs, 3 files."
+    ],
+    "limit": 500,
+    "totalExact": true,
+    "hasMore": false
+   }
+  }
+ ]
+}

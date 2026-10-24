@@ -1,0 +1,81 @@
+{
+ "schema": "corvus.batch/1",
+ "corvus": "2.5.1",
+ "file": {
+  "path": "/tmp/corvus/Notes.dll",
+  "size": 13312,
+  "sha256": "d39c8a08f824caa1919ccab37dc1e2ade2f8a5d59d402d743f58867419049c5f",
+  "type": ".NET assembly"
+ },
+ "complete": true,
+ "limits": {
+  "timeSeconds": 120,
+  "containerFiles": 500,
+  "strings": 500,
+  "yaraMatches": 500,
+  "summaryHighlights": 25
+ },
+ "sections": [
+  {
+   "name": "summary",
+   "tool": "summarize_file",
+   "status": "complete",
+   "result": {
+    "path": "/tmp/corvus/Notes.dll",
+    "size": 13312,
+    "type": ".NET assembly",
+    "sha256": "d39c8a08f824caa1919ccab37dc1e2ade2f8a5d59d402d743f58867419049c5f",
+    "container": "none (plain .NET assembly)",
+    "view": "overview",
+    "views": [
+     "overview",
+     "managed",
+     "all"
+    ],
+    "md5": "0a8d8e9df0fb5deca6cdc8e4575e8fc0",
+    "sha1": "d665a7546209ea069ab98b60abef75f96685d738",
+    "entropy": 5.15,
+    "assemblies": [
+     {
+      "path": "Notes.dll",
+      "name": "Notes",
+      "kind": "console application",
+      "architecture": "AnyCPU",
+      "features": 0,
+      "version": "1.0.0.0",
+      "framework": ".NETCoreApp,Version=v10.0"
+     }
+    ],
+    "entryPoints": [
+     "Main: Notes.Program::Main(string[])"
+    ]
+   }
+  },
+  {
+   "name": "container",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "The file is not a container."
+  },
+  {
+   "name": "strings",
+   "tool": "extract_strings",
+   "status": "complete",
+   "result": {
+    "assembly": "Notes.dll",
+    "items": [],
+    "offset": 0,
+    "total": 0,
+    "limit": 500,
+    "totalExact": true,
+    "hasMore": false
+   }
+  },
+  {
+   "name": "yara",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "No rules were given; --rules names a rule file or folder."
+  }
+ ]
+}

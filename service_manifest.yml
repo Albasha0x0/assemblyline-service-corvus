@@ -1,0 +1,52 @@
+name: Corvus
+version: $SERVICE_TAG
+description: >-
+  Reads executables, packages and archives with Corvus: container members (including .NET single-file
+  bundles, PyInstaller, Nuitka and Il2Cpp builds), the .NET outline, typed strings from .NET assemblies
+  and YARA matches in the file and its members. Nothing in the file runs.
+
+accepts: executable/windows/.*|executable/linux/.*|android/apk|java/jar|archive/zip
+rejects: empty|metadata/.*|executable/windows/dos|executable/windows/com
+
+stage: CORE
+category: Static Analysis
+
+file_required: true
+# Seconds; the Corvus time limit is derived from it (corvus_service/runner.py).
+timeout: 300
+disable_cache: false
+
+enabled: true
+is_external: false
+licence_count: 0
+privileged: false
+
+config:
+  # YARA rule file or folder inside the container; empty leaves the YARA section out.
+  rules_path: ""
+  container_files: 500
+  strings: 500
+  yara_matches: 500
+
+heuristics:
+  - heur_id: 1
+    name: Container read by Corvus
+    score: 0
+    filetype: ".*"
+    description: >-
+      Corvus names the file's container format and lists its members. The signature is the container
+      label Corvus reports; score it per label with signature_score_map.
+
+  - heur_id: 2
+    name: YARA rule matched
+    score: 0
+    filetype: ".*"
+    description: >-
+      A rule from rules_path matched the file or one of its members. The signature is the rule name;
+      score it per rule with signature_score_map.
+
+docker_config:
+  image: ${REGISTRY}assemblyline-service-corvus:$SERVICE_TAG
+  cpu_cores: 1.0
+  ram_mb: 2048
+  allow_internet_access: false

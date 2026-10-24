@@ -1,0 +1,41 @@
+{
+ "schema": "corvus.batch/1",
+ "corvus": "2.5.1",
+ "file": {
+  "path": "/tmp/corvus/zeros.bin"
+ },
+ "complete": false,
+ "limits": {
+  "timeSeconds": 0.001,
+  "containerFiles": 500,
+  "strings": 500,
+  "yaraMatches": 500,
+  "summaryHighlights": 25
+ },
+ "sections": [
+  {
+   "name": "summary",
+   "tool": "summarize_file",
+   "status": "timeout",
+   "reason": "The time limit ended the run before this step."
+  },
+  {
+   "name": "container",
+   "tool": "search_container",
+   "status": "timeout",
+   "reason": "The time limit ended the run before this step."
+  },
+  {
+   "name": "strings",
+   "tool": "extract_strings",
+   "status": "timeout",
+   "reason": "The time limit ended the run before this step."
+  },
+  {
+   "name": "yara",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "No rules were given; --rules names a rule file or folder."
+  }
+ ]
+}

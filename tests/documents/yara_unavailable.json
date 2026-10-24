@@ -1,0 +1,71 @@
+{
+ "schema": "corvus.batch/1",
+ "corvus": "2.5.1",
+ "file": {
+  "path": "/tmp/corvus/notes.txt",
+  "size": 34,
+  "sha256": "fb9261f09c348b8b7cf84eb8c3edb9d59a36d53141d165156144474d42ac32c0",
+  "type": "text"
+ },
+ "complete": false,
+ "limits": {
+  "timeSeconds": 120,
+  "containerFiles": 500,
+  "strings": 500,
+  "yaraMatches": 500,
+  "summaryHighlights": 25
+ },
+ "sections": [
+  {
+   "name": "summary",
+   "tool": "summarize_file",
+   "status": "complete",
+   "result": {
+    "path": "/tmp/corvus/notes.txt",
+    "size": 34,
+    "type": "text",
+    "sha256": "fb9261f09c348b8b7cf84eb8c3edb9d59a36d53141d165156144474d42ac32c0",
+    "container": "none",
+    "view": "overview",
+    "views": [
+     "overview",
+     "all"
+    ],
+    "md5": "2e2aeb0126ae65c1078c49935ce6159f",
+    "sha1": "6853b1bca2780e3b1acd5b54307f3a8daac57ea4",
+    "entropy": 3.76,
+    "notes": [
+     "Not a known container (text) and no embedded .NET images were found.",
+     "No managed assemblies inside: nothing to summarize beyond the file facts."
+    ]
+   }
+  },
+  {
+   "name": "container",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "The file is not a container."
+  },
+  {
+   "name": "strings",
+   "tool": "extract_strings",
+   "status": "not_applicable",
+   "reason": "Typed strings are read from .NET assemblies."
+  },
+  {
+   "name": "yara",
+   "tool": "search_container",
+   "status": "unavailable",
+   "reason": "The worker host is off (CORVUS_WORKER_HOST=0); unset CORVUS_WORKER_HOST to turn it on.",
+   "error": {
+    "code": "provider_unavailable",
+    "retryable": true,
+    "message": "The worker host is off (CORVUS_WORKER_HOST=0); unset CORVUS_WORKER_HOST to turn it on.",
+    "next": "server_status names the missing engine or download and how to enable it; when details.retryAfterMs is given, retry after it",
+    "partial": null,
+    "details": null
+   },
+   "result": null
+  }
+ ]
+}

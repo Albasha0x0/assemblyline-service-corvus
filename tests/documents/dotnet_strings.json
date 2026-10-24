@@ -1,0 +1,112 @@
+{
+ "schema": "corvus.batch/1",
+ "corvus": "2.5.1",
+ "file": {
+  "path": "/tmp/corvus/Hello.dll",
+  "size": 4608,
+  "sha256": "a1312d1fd16eba19da83353c077cb33a7d29692e4f5d1893c634297595660fa2",
+  "type": ".NET assembly"
+ },
+ "complete": true,
+ "limits": {
+  "timeSeconds": 120,
+  "containerFiles": 500,
+  "strings": 500,
+  "yaraMatches": 500,
+  "summaryHighlights": 25
+ },
+ "sections": [
+  {
+   "name": "summary",
+   "tool": "summarize_file",
+   "status": "complete",
+   "result": {
+    "path": "/tmp/corvus/Hello.dll",
+    "size": 4608,
+    "type": ".NET assembly",
+    "sha256": "a1312d1fd16eba19da83353c077cb33a7d29692e4f5d1893c634297595660fa2",
+    "container": "none (plain .NET assembly)",
+    "view": "overview",
+    "views": [
+     "overview",
+     "managed",
+     "all"
+    ],
+    "md5": "2b12e19f4ecae8bb1b5e6e86349b6a8d",
+    "sha1": "84bc29dd0b3efc1be1d0dd17370fcd1dd635e57e",
+    "entropy": 4.06,
+    "assemblies": [
+     {
+      "path": "Hello.dll",
+      "name": "Hello",
+      "kind": "console application",
+      "architecture": "AnyCPU",
+      "features": 0,
+      "version": "1.0.0.0",
+      "framework": ".NETCoreApp,Version=v10.0"
+     }
+    ],
+    "highlights": [
+     "Network values: 1 url, 1 domain."
+    ],
+    "entryPoints": [
+     "Main: Hello.Program::Main()"
+    ],
+    "values": {
+     "url": 1,
+     "domain": 1
+    }
+   }
+  },
+  {
+   "name": "container",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "The file is not a container."
+  },
+  {
+   "name": "strings",
+   "tool": "extract_strings",
+   "status": "complete",
+   "result": {
+    "assembly": "Hello.dll",
+    "items": [
+     {
+      "type": "url",
+      "value": "https://example.com/api/items",
+      "count": 1,
+      "locations": [
+       "Hello.Program::get_Endpoint() @IL_0000"
+      ],
+      "passedTo": []
+     },
+     {
+      "type": "domain",
+      "value": "example.com",
+      "count": 1,
+      "locations": [
+       "Hello.Program::get_Endpoint() @IL_0000"
+      ],
+      "passedTo": []
+     }
+    ],
+    "offset": 0,
+    "total": 2,
+    "byType": {
+     "url": 1,
+     "domain": 1
+    },
+    "valuesResultId": "r-160fa48d9fa6",
+    "limit": 500,
+    "totalExact": true,
+    "hasMore": false
+   }
+  },
+  {
+   "name": "yara",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "No rules were given; --rules names a rule file or folder."
+  }
+ ]
+}

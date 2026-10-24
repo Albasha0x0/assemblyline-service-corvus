@@ -1,0 +1,2 @@
+# The framework the pinned base image ships; nothing else is needed at run time.
+assemblyline-v4-service==4.7.4.24
