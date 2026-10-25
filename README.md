@@ -17,8 +17,6 @@ as `corvus.batch.json`.
 
 - An unfinished step, and a note naming input a step did not read (members past a size cap, rule errors), is
   reported as unknown, never as absent or "no match".
-- Corvus 2.5.1 reads one page per step, so a large container can show `partial` at a limit it did not reach; fixed
-  in the next Corvus release.
 - Heuristics score 0; set scores per signature with `signature_score_map`.
 - No document (exit code other than 0 or 124, or not `corvus.batch/1`) is a service error.
 
