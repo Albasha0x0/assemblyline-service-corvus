@@ -51,17 +51,11 @@ def test_the_dotnet_outline_lists_assemblies_and_entry_points(document):
     assert sub(outline, "Entry points").body == "Main: Hello.Program::Main()"
 
 
-def test_yara_matches_name_the_rule_and_where_it_matched(document):
-    yara = titled(results.sections(document("single_file_bundle")), "YARA matches")
-    assert [(r["Rule"], r["Where"]) for r in rows(yara)] == [("names_the_endpoint", "the file"), ("names_the_endpoint", "Hello.dll")]
-    assert yara.tags == {"file.rule.yara": ["names_the_endpoint"]}
-    assert yara.heuristic.heur_id == results.HEUR_YARA
-    assert yara.heuristic.signatures == {"names_the_endpoint": 2}
-
-
-def test_a_zip_member_match_is_named_by_its_member_path(document):
-    yara = titled(results.sections(document("zip_with_rules")), "YARA matches")
-    assert [(r["Rule"], r["Where"]) for r in rows(yara)] == [("names_the_fixture", "the file"), ("names_the_fixture", "notes.txt")]
+def test_a_yara_section_in_the_document_is_not_shown(document):
+    sections = results.sections(document("single_file_bundle"))
+    assert not any(t.startswith("YARA") for t in titles(sections))
+    assert "YARA" not in summary(sections)
+    assert not any("file.rule.yara" in s.tags for s in sections)
 
 
 def test_typed_strings_are_tagged_by_their_type(document):
@@ -83,7 +77,6 @@ def test_a_complete_reading_has_no_incomplete_section(document):
     assert titles(sections) == ["Corvus file summary"]
     kv = summary(sections)
     assert kv["Reading"] == "complete"
-    assert kv["YARA"] == "not run: no rules_path configured"
     assert "Not a known container (data) and no embedded .NET images were found." in sub(sections[0], "Reader notes").body
 
 
@@ -95,14 +88,6 @@ def test_a_container_over_its_limit_shows_the_rows_read_and_names_the_limit(docu
     assert incomplete[0] == "What these steps did not read is unknown, not absent."
     assert incomplete[1:] == ["container: partial; stopped at the containerFiles limit"]
     assert summary(sections)["Reading"] == "partial; see Incomplete reading"
-
-
-def test_unavailable_yara_is_named_and_never_shown_as_no_match(document):
-    sections = results.sections(document("yara_unavailable"))
-    assert "YARA" not in summary(sections)
-    assert not any(t.startswith("YARA") for t in titles(sections))
-    line = titled(sections, "Incomplete reading").body.splitlines()[1]
-    assert line.startswith("yara: unavailable; ") and "CORVUS_WORKER_HOST=0" in line
 
 
 def test_a_timed_out_run_reports_every_unfinished_step(document):
@@ -158,31 +143,3 @@ def test_a_type_without_an_assemblyline_tag_is_shown_but_not_tagged(document):
     assert rows(table)[-1] == {"Type": "named_pipe", "Value": r"\.\pipe\fixture", "Count": 1, "Location": ""}
     assert set(table.tags) == {"network.static.uri", "network.static.domain"}
 
-
-def yara_without_rows(document, *notes):
-    doc = copy.deepcopy(document("zip_with_rules"))
-    yara = next(s for s in doc["sections"] if s["name"] == "yara")
-    yara["result"].update({"items": [], "total": 0})
-    yara["result"]["notes"] = [yara["result"]["notes"][0], *notes]
-    return doc
-
-
-def test_yara_with_no_rows_and_every_member_scanned_says_no_rule_matched(document):
-    sections = results.sections(yara_without_rows(document))
-    assert summary(sections)["YARA"].startswith("no rule matched (YARA-X 1.22.0: 3 rules from 1 file; 2 container members scanned")
-    assert summary(sections)["Reading"] == "complete"
-    assert not any(t.startswith(("YARA matches", "Incomplete reading")) for t in titles(sections))
-
-
-def test_yara_members_left_unscanned_go_to_incomplete_reading_not_under_no_match(document):
-    note = "Container members not read: the file is larger than 256 MB; it was scanned as one file."
-    sections = results.sections(yara_without_rows(document, note))
-    assert summary(sections)["YARA"] == "no rule matched in what was read; see Incomplete reading"
-    assert summary(sections)["Reading"] == "partial; see Incomplete reading"
-    assert titled(sections, "Incomplete reading").body.splitlines()[1:] == [f"yara: {note}"]
-
-
-def test_a_missing_rules_path_reports_yara_as_not_run_with_the_reason(document):
-    sections = results.sections(document("plain_data"), rules_missing="rules_path /opt/rules does not exist")
-    assert summary(sections)["YARA"] == "not run: rules_path /opt/rules does not exist"
-    assert titled(sections, "Incomplete reading").body.splitlines()[1:] == ["yara: not run; rules_path /opt/rules does not exist"]

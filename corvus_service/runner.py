@@ -1,8 +1,6 @@
 """The corvus batch command line and the time limits it runs under."""
 
-import hashlib
-import os
-from typing import List, Optional
+from typing import List
 
 CORVUS = "/opt/corvus/corvus"
 
@@ -31,46 +29,17 @@ def kill_after(limit: int, service_timeout: int) -> int:
     return max(1, min(limit + GRACE_SECONDS, service_timeout - STOP_MARGIN_SECONDS))
 
 
-def rules_digest(rules: Optional[str]) -> Optional[str]:
-    """Returns the first 12 hex digits of a SHA-256 over the rule files' relative paths and contents, None when
-    rules is empty, or "missing" when the path does not exist."""
-    if not rules:
-        return None
-    if os.path.isfile(rules):
-        files = [(os.path.basename(rules), rules)]
-    elif os.path.isdir(rules):
-        files = sorted(
-            (os.path.relpath(os.path.join(root, name), rules).replace(os.sep, "/"), os.path.join(root, name))
-            for root, _, names in os.walk(rules)
-            for name in names
-        )
-    else:
-        return "missing"
-    digest = hashlib.sha256()
-    for relative, full in files:
-        digest.update(relative.encode() + b"\0")
-        with open(full, "rb") as f:
-            digest.update(hashlib.sha256(f.read()).digest())
-    return digest.hexdigest()[:12]
-
-
 def command(
     path: str,
     limit: int,
-    rules: Optional[str] = None,
     container_files: int = 500,
     strings: int = 500,
-    yara_matches: int = 500,
     corvus: str = CORVUS,
 ) -> List[str]:
-    """Returns the corvus batch argument list for one file; rules is omitted when empty."""
-    args = [
+    """Returns the corvus batch argument list for one file."""
+    return [
         corvus, "batch", "--file", path, "--json", "--no-index",
         "--time-limit", str(limit),
         "--limit", f"containerFiles={container_files}",
         "--limit", f"strings={strings}",
-        "--limit", f"yaraMatches={yara_matches}",
     ]
-    if rules:
-        args += ["--rules", rules]
-    return args

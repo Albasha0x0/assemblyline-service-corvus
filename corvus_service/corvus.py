@@ -28,18 +28,9 @@ class Corvus(ServiceBase):
     def start(self):
         # Read once: Assemblyline asks for the tool version on every task and keys its result cache on it.
         try:
-            corvus = subprocess.run([self.corvus, "version"], capture_output=True, text=True, timeout=60).stdout.strip()
+            self.tool_version = subprocess.run([self.corvus, "version"], capture_output=True, text=True, timeout=60).stdout.strip()
         except (OSError, subprocess.SubprocessError):
-            corvus = "unknown"
-        rules = runner.rules_digest(self.config.get("rules_path") or None)
-        self.tool_version = f"{corvus}.rules-{rules}" if rules else corvus
-        if self.rules_missing():
-            self.log.warning(f"{self.rules_missing()}; files are read without YARA")
-
-    def rules_missing(self):
-        """Returns why the configured rules_path is not passed to Corvus, or None when it exists or is empty."""
-        rules = self.config.get("rules_path") or None
-        return f"rules_path {rules} does not exist" if rules and not os.path.exists(rules) else None
+            self.tool_version = "unknown"
 
     def get_tool_version(self):
         return self.tool_version
@@ -47,14 +38,11 @@ class Corvus(ServiceBase):
     def execute(self, request: ServiceRequest) -> None:
         timeout = int(self.service_attributes.timeout)
         limit = runner.time_limit(timeout)
-        rules_missing = self.rules_missing()
         args = runner.command(
             request.file_path,
             limit,
-            rules=None if rules_missing else self.config.get("rules_path") or None,
             container_files=int(self.config.get("container_files", 500)),
             strings=int(self.config.get("strings", 500)),
-            yara_matches=int(self.config.get("yara_matches", 500)),
             corvus=self.corvus,
         )
         document = self.run(args, runner.kill_after(limit, timeout))
@@ -65,7 +53,7 @@ class Corvus(ServiceBase):
         request.add_supplementary(path, DOCUMENT_NAME, f"{results.SCHEMA} document written by Corvus")
 
         result = Result()
-        for section in results.sections(document, rules_missing):
+        for section in results.sections(document):
             result.add_section(section)
         request.result = result
 

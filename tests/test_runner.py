@@ -20,22 +20,8 @@ def test_the_kill_time_is_the_limit_plus_grace_when_the_timeout_allows_it():
 
 
 def test_the_command_reads_one_file_with_the_configured_limits():
-    assert runner.command("/tmp/f", 255, container_files=7, strings=8, yara_matches=9, corvus="corvus") == [
+    assert runner.command("/tmp/f", 255, container_files=7, strings=8, corvus="corvus") == [
         "corvus", "batch", "--file", "/tmp/f", "--json", "--no-index", "--time-limit", "255",
-        "--limit", "containerFiles=7", "--limit", "strings=8", "--limit", "yaraMatches=9",
+        "--limit", "containerFiles=7", "--limit", "strings=8",
     ]
 
-
-def test_rules_are_passed_only_when_configured():
-    assert "--rules" not in runner.command("/tmp/f", 255, rules="")
-    assert runner.command("/tmp/f", 255, rules="/opt/rules")[-2:] == ["--rules", "/opt/rules"]
-
-
-def test_the_rules_digest_follows_rule_content(tmp_path):
-    assert runner.rules_digest(None) is None
-    assert runner.rules_digest(str(tmp_path / "absent")) == "missing"
-    (tmp_path / "a.yar").write_text("rule a { condition: true }")
-    first = runner.rules_digest(str(tmp_path))
-    assert first == runner.rules_digest(str(tmp_path)) and len(first) == 12
-    (tmp_path / "a.yar").write_text("rule a { condition: false }")
-    assert runner.rules_digest(str(tmp_path)) != first

@@ -16,7 +16,6 @@ from assemblyline_v4_service.common.result import (
 SCHEMA = "corvus.batch/1"
 
 HEUR_CONTAINER = 1
-HEUR_YARA = 2
 
 # Statuses whose section holds everything it was meant to read.
 DONE = ("complete", "not_applicable")
@@ -35,7 +34,7 @@ STRING_TAGS = {
 }
 
 
-# Reader notes that name input a step did not read, such as members past a size cap or rule errors.
+# Reader notes that name input a step did not read, such as members past a size cap.
 UNREAD = re.compile(r"\bnot (read|scanned|run)\b|\bthe rest were not\b|\bskipped\b|\btruncated\b", re.IGNORECASE)
 
 
@@ -83,7 +82,7 @@ def _unread(section: Dict[str, Any]) -> List[str]:
     return [n for n in _result(section).get("notes") or [] if isinstance(n, str) and UNREAD.search(n)]
 
 
-def _incomplete(document: Dict[str, Any], rules_missing: Optional[str]) -> List[str]:
+def _incomplete(document: Dict[str, Any]) -> List[str]:
     """Returns one line per section that did not read everything, with Corvus's reason or limit, and one per
     note of a finished section that names input it did not read."""
     lines = []
@@ -91,9 +90,7 @@ def _incomplete(document: Dict[str, Any], rules_missing: Optional[str]) -> List[
         if not isinstance(section, dict):
             continue
         name, status = section.get("name", "?"), section.get("status", "?")
-        if name == "yara" and rules_missing:
-            lines.append(f"yara: not run; {rules_missing}")
-        elif status in DONE:
+        if status in DONE:
             lines += [f"{name}: {note}" for note in _unread(section) if f"{name}: {note}" not in lines]
         elif status == "partial" and section.get("limit"):
             lines.append(f"{name}: {status}; stopped at the {section['limit']} limit")
@@ -103,8 +100,7 @@ def _incomplete(document: Dict[str, Any], rules_missing: Optional[str]) -> List[
     return lines
 
 
-def _summary(document: Dict[str, Any], summary: Dict[str, Any], yara: Dict[str, Any], strings: Dict[str, Any],
-             rules_missing: Optional[str], complete: bool) -> ResultSection:
+def _summary(document: Dict[str, Any], summary: Dict[str, Any], strings: Dict[str, Any], complete: bool) -> ResultSection:
     facts = _result(summary)
     file = document.get("file") or {}
     kv = ResultKeyValueSection("Corvus file summary")
@@ -117,16 +113,6 @@ def _summary(document: Dict[str, Any], summary: Dict[str, Any], yara: Dict[str, 
         kv.set_item("Signature", facts["signature"])
     if strings.get("status") == "complete" and not _items(strings):
         kv.set_item("Typed strings", "none found")
-    if rules_missing:
-        kv.set_item("YARA", f"not run: {rules_missing}")
-    elif yara.get("status") == "complete" and not _items(yara):
-        notes = [n for n in _result(yara).get("notes") or [] if isinstance(n, str)]
-        if _unread(yara):
-            kv.set_item("YARA", "no rule matched in what was read; see Incomplete reading")
-        else:
-            kv.set_item("YARA", "no rule matched" + (f" ({notes[0]})" if notes else ""))
-    elif yara.get("status") == "not_applicable":
-        kv.set_item("YARA", "not run: no rules_path configured")
     kv.set_item("Reading", "complete" if complete else "partial; see Incomplete reading")
     kv.set_item("Corvus", document.get("corvus", "unknown"))
 
@@ -196,34 +182,16 @@ def _strings(strings: Dict[str, Any]) -> Optional[ResultSection]:
     return table
 
 
-def _yara(document: Dict[str, Any], yara: Dict[str, Any]) -> Optional[ResultSection]:
-    items = _items(yara)
-    if not items:
-        return None
-    own = {(document.get("file") or {}).get("path"), _result(yara).get("source")}
-    table = ResultTableSection(f"YARA matches ({_count(yara)})")
-    rules: Dict[str, int] = {}
-    for item in items:
-        rule = item.get("name") or "?"
-        path = item.get("path")
-        table.add_row(TableRow({"Rule": rule, "Where": "the file" if path in own else path, "Detail": item.get("detail")}))
-        table.add_tag("file.rule.yara", rule)
-        rules[rule] = rules.get(rule, 0) + 1
-    table.set_heuristic(Heuristic(HEUR_YARA, signatures=rules))
-    return table
-
-
-def sections(document: Any, rules_missing: Optional[str] = None) -> List[ResultSection]:
+def sections(document: Any) -> List[ResultSection]:
     """Returns the result sections of a corvus.batch/1 document, in display order; raises DocumentError for
-    another document. A section Corvus could not finish is named under Incomplete reading, never shown as empty.
-    rules_missing is the reason a configured rules_path was not passed to Corvus, or None."""
+    another document. A section Corvus could not finish is named under Incomplete reading, never shown as empty."""
     document = check(document)
     summary, container = _section(document, "summary"), _section(document, "container")
-    strings, yara = _section(document, "strings"), _section(document, "yara")
-    lines = _incomplete(document, rules_missing)
+    strings = _section(document, "strings")
+    lines = _incomplete(document)
     complete = document.get("complete") is True and not lines
-    out: List[ResultSection] = [_summary(document, summary, yara, strings, rules_missing, complete)]
-    for built in (_container(summary, container), _outline(summary), _strings(strings), _yara(document, yara)):
+    out: List[ResultSection] = [_summary(document, summary, strings, complete)]
+    for built in (_container(summary, container), _outline(summary), _strings(strings)):
         if built is not None:
             out.append(built)
     if lines:

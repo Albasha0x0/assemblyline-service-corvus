@@ -69,29 +69,3 @@ def test_a_run_without_a_document_is_a_service_error(service):
     with pytest.raises(CorvusError, match="exited with 2: usage"):
         service(None, code=2).execute(Request("/tmp/corvus/absent"))
 
-
-def test_the_configured_rules_change_the_tool_version(service, tmp_path):
-    rules = tmp_path / "rules.yar"
-    rules.write_text("rule a { condition: true }")
-    corvus = service("plain_data")
-    corvus.config["rules_path"] = str(rules)
-    corvus.start()
-    assert corvus.get_tool_version().startswith("2.5.1.rules-")
-
-
-def test_a_missing_rules_path_reads_the_file_without_yara(service, tmp_path):
-    corvus = service("plain_data")
-    corvus.config["rules_path"] = str(tmp_path / "absent")
-    corvus.start()
-    args, real = [], corvus.run
-
-    def run(command, kill_after):
-        args.extend(command)
-        return real(command, kill_after)
-
-    corvus.run = run
-    request = Request("/tmp/corvus/zeros.bin")
-    corvus.execute(request)
-    assert "--rules" not in args
-    incomplete = next(s for s in request.result.sections if s.title_text == "Incomplete reading")
-    assert incomplete.body.splitlines()[1] == f"yara: not run; rules_path {tmp_path / 'absent'} does not exist"
