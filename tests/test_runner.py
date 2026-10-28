@@ -25,3 +25,18 @@ def test_the_command_reads_one_file_with_the_configured_limits():
         "--limit", "containerFiles=7", "--limit", "strings=8",
     ]
 
+
+
+def test_the_steps_share_the_time_left_before_the_reserve():
+    assert runner.steps_budget(300, 30.5, 2) == (119, 254)
+    assert runner.steps_budget(300, 0, 1) == (270, 285)
+
+
+def test_no_steps_run_when_less_than_the_minimum_is_left():
+    assert runner.steps_budget(300, 265, 2) is None
+    assert runner.steps_budget(300, 0, 0) is None
+
+
+def test_the_steps_command_runs_one_session_with_a_call_timeout():
+    assert runner.steps_command("/tmp/s.jsonl", 60, corvus="corvus") == [
+        "corvus", "batch", "/tmp/s.jsonl", "--json", "--no-index", "--timeout", "60"]

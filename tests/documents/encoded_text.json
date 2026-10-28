@@ -1,0 +1,136 @@
+{
+ "schema": "corvus.batch/1",
+ "corvus": "2.7.2",
+ "file": {
+  "path": "/tmp/corvus/Settings.dll",
+  "size": 5120,
+  "sha256": "13cc75f553bfa0c8a9982d380c6d60f254cc4a32ba36f8053b419b5225cba7ca",
+  "type": ".NET assembly"
+ },
+ "complete": true,
+ "limits": {
+  "timeSeconds": 120,
+  "containerFiles": 500,
+  "strings": 500,
+  "yaraMatches": 500,
+  "assetBytes": 1073741824,
+  "summaryHighlights": 25
+ },
+ "sections": [
+  {
+   "name": "summary",
+   "tool": "summarize_file",
+   "status": "complete",
+   "result": {
+    "path": "/tmp/corvus/Settings.dll",
+    "size": 5120,
+    "type": ".NET assembly",
+    "sha256": "13cc75f553bfa0c8a9982d380c6d60f254cc4a32ba36f8053b419b5225cba7ca",
+    "container": "none (plain .NET assembly)",
+    "view": "overview",
+    "views": [
+     "overview",
+     "managed",
+     "all"
+    ],
+    "md5": "ced3a27dc0cfeb3a552bdf47e8ac80ad",
+    "sha1": "4807ecdb6d24bd3968ee7d5424e68d60f23cfbe9",
+    "entropy": 3.95,
+    "assemblies": [
+     {
+      "path": "Settings.dll",
+      "name": "Settings",
+      "kind": "library",
+      "architecture": "AnyCPU",
+      "features": 1,
+      "version": "1.0.0.0",
+      "framework": ".NETCoreApp,Version=v10.0"
+     }
+    ],
+    "highlights": [
+     "Embedded text in string const Settings.Defaults::Encoded, encoded as base64.",
+     "Embedded text in string Settings.Defaults::Text() @IL_0005, encoded as base64.",
+     "Network values: 1 url, 1 domain."
+    ],
+    "values": {
+     "url": 1,
+     "domain": 1,
+     "encoded": 1
+    }
+   }
+  },
+  {
+   "name": "container",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "The file is not a container."
+  },
+  {
+   "name": "strings",
+   "tool": "extract_strings",
+   "status": "complete",
+   "result": {
+    "assembly": "Settings.dll",
+    "items": [
+     {
+      "type": "url",
+      "value": "https://example.com/api/items",
+      "count": 8,
+      "locations": [
+       "string const Settings.Defaults::Encoded (decoded: base64)",
+       "string Settings.Defaults::Text() @IL_0005 (decoded: base64)"
+      ],
+      "passedTo": []
+     },
+     {
+      "type": "domain",
+      "value": "example.com",
+      "count": 8,
+      "locations": [
+       "string const Settings.Defaults::Encoded (decoded: base64)",
+       "string Settings.Defaults::Text() @IL_0005 (decoded: base64)"
+      ],
+      "passedTo": []
+     },
+     {
+      "type": "encoded",
+      "value": "ZW5kcG9pbnQ9aHR0cHM6Ly9leGFtcGxlLmNvbS9hcGkvaXRlbXMKcmV0cnk9MwplbmRwb2ludD1odHRwczovL2V4YW1wbGUuY29tL2FwaS9pdGVtcwpyZXRyeT0zCmVuZHBvaW50PWh0dHBzOi8vZXhhbXBsZS5jb20vYXBpL2l0ZW1zCnJldHJ5PTMKZW5kcG9pbnQ9aHR0cHM6Ly9leGFtcGxlLmNvbS9hcGkvaXRlbXMKcmV0cnk9Mwo=",
+      "count": 2,
+      "locations": [
+       "const Settings.Defaults::Encoded",
+       "Settings.Defaults::Text() @IL_0005"
+      ],
+      "passedTo": [
+       "System.Convert::FromBase64String",
+       "System.Text.Encoding::GetString"
+      ],
+      "detail": "base64, 188 bytes"
+     }
+    ],
+    "offset": 0,
+    "total": 3,
+    "byType": {
+     "url": 1,
+     "domain": 1,
+     "encoded": 1
+    },
+    "valuesResultId": "r-97c79f53bc92",
+    "limit": 500,
+    "totalExact": true,
+    "hasMore": false
+   }
+  },
+  {
+   "name": "yara",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "No rules were given; --rules names a rule file or folder."
+  },
+  {
+   "name": "build",
+   "tool": "summarize_build",
+   "status": "not_applicable",
+   "reason": "A build with asset files is read from a folder, package or zip that holds it."
+  }
+ ]
+}

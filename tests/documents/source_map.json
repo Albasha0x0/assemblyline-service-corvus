@@ -1,0 +1,69 @@
+{
+ "schema": "corvus.batch/1",
+ "corvus": "2.7.2",
+ "file": {
+  "path": "/tmp/corvus/mapped.js",
+  "size": 337,
+  "sha256": "1512fcc7ad89f1c117b69bb8286b0543e79baa2dac1229b35c0054b5f644a21e",
+  "type": "text"
+ },
+ "complete": true,
+ "limits": {
+  "timeSeconds": 120,
+  "containerFiles": 500,
+  "strings": 500,
+  "yaraMatches": 500,
+  "assetBytes": 1073741824,
+  "summaryHighlights": 25
+ },
+ "sections": [
+  {
+   "name": "summary",
+   "tool": "summarize_file",
+   "status": "complete",
+   "result": {
+    "path": "/tmp/corvus/mapped.js",
+    "size": 337,
+    "type": "text",
+    "sha256": "1512fcc7ad89f1c117b69bb8286b0543e79baa2dac1229b35c0054b5f644a21e",
+    "container": "none",
+    "view": "overview",
+    "views": [
+     "overview",
+     "all"
+    ],
+    "md5": "843a1920d281eee7c7438cc5ee7015c7",
+    "sha1": "db9a3dd97478a9b236a589c2a1fd12958086e892",
+    "entropy": 5.69,
+    "notes": [
+     "Not a known container (text) and no embedded .NET images were found.",
+     "No managed assemblies inside: nothing to summarize beyond the file facts."
+    ]
+   }
+  },
+  {
+   "name": "container",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "The file is not a container."
+  },
+  {
+   "name": "strings",
+   "tool": "extract_strings",
+   "status": "not_applicable",
+   "reason": "Typed strings are read from .NET assemblies, files that hold them, and serialized asset files."
+  },
+  {
+   "name": "yara",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "No rules were given; --rules names a rule file or folder."
+  },
+  {
+   "name": "build",
+   "tool": "summarize_build",
+   "status": "not_applicable",
+   "reason": "A build with asset files is read from a folder, package or zip that holds it."
+  }
+ ]
+}

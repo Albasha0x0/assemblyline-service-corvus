@@ -1,7 +1,7 @@
 """Maps a corvus.batch/1 document to Assemblyline result sections."""
 
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence
 
 from assemblyline_v4_service.common.result import (
     Heuristic,
@@ -16,6 +16,9 @@ from assemblyline_v4_service.common.result import (
 SCHEMA = "corvus.batch/1"
 
 HEUR_CONTAINER = 1
+
+# Files named in Files not extracted; the rest are counted.
+MAX_NAMED = 100
 
 # Statuses whose section holds everything it was meant to read.
 DONE = ("complete", "not_applicable")
@@ -138,7 +141,7 @@ def _container(summary: Dict[str, Any], container: Dict[str, Any]) -> Optional[R
     if not items:
         return None
     label = _result(container).get("container") or _result(summary).get("container") or "container"
-    table = ResultTableSection(f"Container: {label} ({_count(container)} members listed, not extracted)")
+    table = ResultTableSection(f"Container: {label} ({_count(container)} members)")
     for item in items:
         table.add_row(TableRow({"Path": item.get("path"), "Detail": item.get("detail")}))
     table.set_heuristic(Heuristic(HEUR_CONTAINER, signature=label))
@@ -182,18 +185,32 @@ def _strings(strings: Dict[str, Any]) -> Optional[ResultSection]:
     return table
 
 
-def sections(document: Any) -> List[ResultSection]:
-    """Returns the result sections of a corvus.batch/1 document, in display order; raises DocumentError for
-    another document. A section Corvus could not finish is named under Incomplete reading, never shown as empty."""
+def not_extracted(unlisted: List[str], unadded: List[str], max_extracted: int) -> Optional[ResultSection]:
+    """Returns the section naming files past Corvus's page limit and files not added past max_extracted; None
+    when there are neither."""
+    lines = list(unlisted)
+    if unadded:
+        lines.append(f"{len(unadded)} files not added: max_extracted is {max_extracted}")
+        lines += unadded[:MAX_NAMED]
+        if len(unadded) > MAX_NAMED:
+            lines.append(f"{len(unadded) - MAX_NAMED} more not named")
+    return ResultTextSection("Files not extracted", body="\n".join(lines)) if lines else None
+
+
+def sections(document: Any, more: Sequence[ResultSection] = (), unread: Sequence[str] = ()) -> List[ResultSection]:
+    """Returns the result sections of a corvus.batch/1 document, then more, in display order; raises
+    DocumentError for another document. A section Corvus could not finish, and each line of unread, is named under
+    Incomplete reading, never shown as empty."""
     document = check(document)
     summary, container = _section(document, "summary"), _section(document, "container")
     strings = _section(document, "strings")
-    lines = _incomplete(document)
+    lines = _incomplete(document) + list(unread)
     complete = document.get("complete") is True and not lines
     out: List[ResultSection] = [_summary(document, summary, strings, complete)]
     for built in (_container(summary, container), _outline(summary), _strings(strings)):
         if built is not None:
             out.append(built)
+    out += more
     if lines:
         body = "What these steps did not read is unknown, not absent.\n" + "\n".join(lines)
         out.append(ResultTextSection("Incomplete reading", body=body))

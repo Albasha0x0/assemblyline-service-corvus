@@ -1,6 +1,6 @@
-"""The corvus batch command line and the time limits it runs under."""
+"""The corvus batch command lines and the time limits they run under."""
 
-from typing import List
+from typing import List, Optional, Tuple
 
 CORVUS = "/opt/corvus/corvus"
 
@@ -43,3 +43,19 @@ def command(
         "--limit", f"containerFiles={container_files}",
         "--limit", f"strings={strings}",
     ]
+
+
+def steps_budget(service_timeout: int, elapsed: float, count: int) -> Optional[Tuple[int, int]]:
+    """Returns the per-call timeout and the kill time in seconds for count steps started elapsed seconds into
+    the task, or None when less than MIN_TIME_LIMIT is left before the reserve."""
+    left = int(service_timeout - RESERVE_SECONDS - elapsed)
+    if count < 1 or left < MIN_TIME_LIMIT:
+        return None
+    kill = max(1, min(left + GRACE_SECONDS, int(service_timeout - STOP_MARGIN_SECONDS - elapsed)))
+    return max(1, left // count), kill
+
+
+def steps_command(steps_file: str, call_timeout: int, corvus: str = CORVUS) -> List[str]:
+    """Returns the corvus batch argument list that runs a steps file in one session, each call bounded by
+    call_timeout seconds."""
+    return [corvus, "batch", steps_file, "--json", "--no-index", "--timeout", str(call_timeout)]

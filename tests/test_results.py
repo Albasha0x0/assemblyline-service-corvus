@@ -31,7 +31,7 @@ def sub(section, title):
 def test_a_single_file_bundle_lists_its_members_under_the_container_heuristic(document):
     sections = results.sections(document("single_file_bundle"))
     container = titled(sections, "Container: .NET single-file bundle")
-    assert container.title_text.endswith("(3 members listed, not extracted)")
+    assert container.title_text.endswith("(3 members)")
     assert [r["Path"] for r in rows(container)] == ["Hello.dll", "Hello.runtimeconfig.json", "Hello.deps.json"]
     assert container.heuristic.heur_id == results.HEUR_CONTAINER
     assert container.heuristic.signatures == {".NET single-file bundle": 1}
@@ -83,7 +83,7 @@ def test_a_complete_reading_has_no_incomplete_section(document):
 def test_a_container_over_its_limit_shows_the_rows_read_and_names_the_limit(document):
     sections = results.sections(document("container_partial"))
     container = titled(sections, "Container: zip archive")
-    assert "(1 of 2 members listed, not extracted)" in container.title_text
+    assert "(1 of 2 members)" in container.title_text
     incomplete = titled(sections, "Incomplete reading").body.splitlines()
     assert incomplete[0] == "What these steps did not read is unknown, not absent."
     assert incomplete[1:] == ["container: partial; stopped at the containerFiles limit"]

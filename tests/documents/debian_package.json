@@ -1,0 +1,96 @@
+{
+ "schema": "corvus.batch/1",
+ "corvus": "2.7.2",
+ "file": {
+  "path": "/tmp/corvus/hello.deb",
+  "size": 548,
+  "sha256": "db6b6bd708a5a1144f48d4eb882d62e3ce81e746199566e88db80bf29b1b8234",
+  "type": "data"
+ },
+ "complete": true,
+ "limits": {
+  "timeSeconds": 120,
+  "containerFiles": 500,
+  "strings": 500,
+  "yaraMatches": 500,
+  "assetBytes": 1073741824,
+  "summaryHighlights": 25
+ },
+ "sections": [
+  {
+   "name": "summary",
+   "tool": "summarize_file",
+   "status": "complete",
+   "result": {
+    "path": "/tmp/corvus/hello.deb",
+    "size": 548,
+    "type": "data",
+    "sha256": "db6b6bd708a5a1144f48d4eb882d62e3ce81e746199566e88db80bf29b1b8234",
+    "container": "debian package",
+    "view": "overview",
+    "views": [
+     "overview",
+     "all"
+    ],
+    "md5": "616ab33704186903fe29102e3edb5b89",
+    "sha1": "17c62344ad997305c979fe915acba0120fb8e81f",
+    "entropy": 6.82,
+    "notes": [
+     "debian package hello 1.0.0 (all); Notes file (format 2.0)",
+     "data.tar.zst: 1 of 1 files not extracted (not binaries or packages; allFiles extracts every file).",
+     "No managed assemblies inside: nothing to summarize beyond the file facts."
+    ]
+   }
+  },
+  {
+   "name": "container",
+   "tool": "search_container",
+   "status": "complete",
+   "result": {
+    "source": "/tmp/corvus/hello.deb",
+    "container": "debian package",
+    "searched": 2,
+    "items": [
+     {
+      "path": "DEBIAN/control",
+      "name": "DEBIAN/control",
+      "kind": "file",
+      "detail": "text, 110 bytes"
+     },
+     {
+      "path": "usr/share/hello/notes.txt",
+      "name": "usr/share/hello/notes.txt",
+      "kind": "file",
+      "detail": "text, 34 bytes"
+     }
+    ],
+    "offset": 0,
+    "total": 2,
+    "notes": [
+     "debian package hello 1.0.0 (all); Notes file (format 2.0)"
+    ],
+    "limit": 500,
+    "totalExact": true,
+    "hasMore": false
+   }
+  },
+  {
+   "name": "strings",
+   "tool": "extract_strings",
+   "status": "not_applicable",
+   "reason": "Typed strings are read from .NET assemblies, files that hold them, and serialized asset files."
+  },
+  {
+   "name": "yara",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "No rules were given; --rules names a rule file or folder."
+  },
+  {
+   "name": "build",
+   "tool": "summarize_build",
+   "status": "not_applicable",
+   "reason": "A build with asset files is read from a folder, package or zip that holds it."
+  }
+ ]
+}

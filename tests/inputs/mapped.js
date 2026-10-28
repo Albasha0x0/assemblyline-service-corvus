@@ -1,0 +1,2 @@
+var endpoint="https://example.com/api/items";
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjogMywgImZpbGUiOiAibWFwcGVkLmpzIiwgInNvdXJjZXMiOiBbInNyYy9hcGkuanMiXSwgInNvdXJjZXNDb250ZW50IjogWyJleHBvcnQgY29uc3QgZW5kcG9pbnQgPSBcImh0dHBzOi8vZXhhbXBsZS5jb20vYXBpL2l0ZW1zXCI7XG4iXSwgIm5hbWVzIjogW10sICJtYXBwaW5ncyI6ICJBQUFBIn0=
