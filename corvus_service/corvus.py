@@ -68,6 +68,9 @@ class Corvus(ServiceBase):
         built = (results.toolchain(outcome.facts), results.not_extracted(outcome.unlisted, unadded, max_extracted))
         more = [s for s in built if s is not None]
 
+        # A partial result is cached under its own key, so a later submission reads the file again.
+        if not results.complete(document, outcome.unread):
+            request.partial()
         result = Result()
         for section in results.sections(document, more, outcome.unread):
             result.add_section(section)

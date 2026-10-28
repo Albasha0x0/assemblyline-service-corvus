@@ -27,7 +27,7 @@ recovers, added as extracted files:
 | Incomplete reading | sections `partial`, `unavailable`, `error` or `timeout`, with Corvus's limit or reason; steps with an error or no output | — |
 
 - An unfinished step, and a note naming input a step did not read (members past a size cap), is reported as
-  unknown, never as absent.
+  unknown, never as absent, and marks the result partial.
 - Heuristics score 0; set scores per signature with `signature_score_map`.
 - No document (exit code other than 0 or 124, or not `corvus.batch/1`) is a service error.
 

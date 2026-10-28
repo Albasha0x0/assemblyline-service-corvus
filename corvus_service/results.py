@@ -210,6 +210,13 @@ def not_extracted(unlisted: List[str], unadded: List[str], max_extracted: int) -
     return ResultTextSection("Files not extracted", body="\n".join(lines)) if lines else None
 
 
+def complete(document: Any, unread: Sequence[str] = ()) -> bool:
+    """Returns True when the document says complete and no section, note or line of unread names input that was
+    not read; raises DocumentError for another document."""
+    document = check(document)
+    return document.get("complete") is True and not _incomplete(document) and not unread
+
+
 def sections(document: Any, more: Sequence[ResultSection] = (), unread: Sequence[str] = ()) -> List[ResultSection]:
     """Returns the result sections of a corvus.batch/1 document, then more, in display order; raises
     DocumentError for another document. A section Corvus could not finish, and each line of unread, is named under
@@ -218,8 +225,8 @@ def sections(document: Any, more: Sequence[ResultSection] = (), unread: Sequence
     summary, container = _section(document, "summary"), _section(document, "container")
     strings = _section(document, "strings")
     lines = _incomplete(document) + list(unread)
-    complete = document.get("complete") is True and not lines
-    out: List[ResultSection] = [_summary(document, summary, strings, complete)]
+    read_all = complete(document, unread)
+    out: List[ResultSection] = [_summary(document, summary, strings, read_all)]
     for built in (_container(summary, container), _outline(summary), _strings(strings)):
         if built is not None:
             out.append(built)

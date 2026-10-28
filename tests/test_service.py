@@ -24,6 +24,10 @@ class Request:
         self.result = None
         self.supplementary = []
         self.extracted = []
+        self.partial_result = False
+
+    def partial(self):
+        self.partial_result = True
 
     def add_supplementary(self, path, name, description):
         self.supplementary.append((path, name, description))
@@ -111,6 +115,7 @@ def test_a_run_the_time_limit_ended_is_still_reported(service):
     request = Request("/tmp/corvus/zeros.bin")
     service("timeout", code=124).execute(request)
     assert titles(request) == ["Corvus file summary", "Incomplete reading"]
+    assert request.partial_result
 
 
 def test_a_run_without_a_document_is_a_service_error(service):
@@ -127,6 +132,7 @@ def test_container_members_are_added_as_extracted_files(service):
         ("usr/share/hello/notes.txt", "debian package member, debian package data.tar.zst"),
     ]
     assert "Incomplete reading" not in titles(request)
+    assert not request.partial_result
 
 
 def test_a_decoded_payload_is_added_as_an_extracted_file(service):
@@ -161,3 +167,9 @@ def test_the_sbom_is_attached_as_a_supplementary_file(service):
     request = Request("/tmp/corvus/hello-go", "executable/linux/elf64")
     service("go_program").execute(request)
     assert [name for _, name, _ in request.supplementary] == ["corvus.batch.json", "corvus.cdx.json"]
+
+
+def test_a_step_that_did_not_finish_marks_the_result_partial(service):
+    request = Request("/tmp/corvus/hello-bundle.exe", "executable/windows/pe64")
+    service("single_file_bundle").execute(request)
+    assert request.partial_result
