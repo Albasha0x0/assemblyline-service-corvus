@@ -46,8 +46,10 @@ class Corvus(ServiceBase):
         started = time.monotonic()
         timeout = int(self.service_attributes.timeout)
         limit = runner.time_limit(timeout)
+        # Assemblyline names the file by its SHA-256, without the extension a script is read by.
+        path = runner.named(request.file_path, request.file_type or "", self.working_directory)
         args = runner.command(
-            request.file_path,
+            path,
             limit,
             container_files=int(self.config.get("container_files", 500)),
             strings=int(self.config.get("strings", 500)),
@@ -55,12 +57,12 @@ class Corvus(ServiceBase):
         )
         document = self.run(args, runner.kill_after(limit, timeout))
 
-        path = os.path.join(self.working_directory, DOCUMENT_NAME)
-        with open(path, "w", encoding="utf-8") as f:
+        saved = os.path.join(self.working_directory, DOCUMENT_NAME)
+        with open(saved, "w", encoding="utf-8") as f:
             json.dump(document, f, indent=1)
-        request.add_supplementary(path, DOCUMENT_NAME, f"{results.SCHEMA} document written by Corvus")
+        request.add_supplementary(saved, DOCUMENT_NAME, f"{results.SCHEMA} document written by Corvus")
 
-        outcome = self.run_steps(request, document, timeout, time.monotonic() - started)
+        outcome = self.run_steps(request, path, document, timeout, time.monotonic() - started)
         if outcome.sbom:
             request.add_supplementary(outcome.sbom, SBOM_NAME, "CycloneDX 1.6 SBOM written by Corvus")
         max_extracted = int(request.max_extracted or 0)
@@ -76,7 +78,7 @@ class Corvus(ServiceBase):
             result.add_section(section)
         request.result = result
 
-    def run_steps(self, request: ServiceRequest, document, timeout: int, elapsed: float) -> steps.Outcome:
+    def run_steps(self, request: ServiceRequest, path: str, document, timeout: int, elapsed: float) -> steps.Outcome:
         """Runs the steps that apply to the file in one corvus session within the time left; a step that did not
         finish is named in the outcome, never raised."""
         work = self.working_directory
@@ -85,7 +87,7 @@ class Corvus(ServiceBase):
         unpacked = tempfile.mkdtemp(prefix="unpacked-", dir=work)
         embedded = tempfile.mkdtemp(prefix="embedded-", dir=work)
         sbom = os.path.join(work, SBOM_NAME)
-        planned = steps.plan(request.file_path, document, request.file_type or "", unpacked, embedded, sbom, limit)
+        planned = steps.plan(path, document, request.file_type or "", unpacked, embedded, sbom, limit)
         budget = runner.steps_budget(timeout, elapsed, len(planned))
         if budget is None:
             return steps.outcome({}, planned, steps.NO_TIME)

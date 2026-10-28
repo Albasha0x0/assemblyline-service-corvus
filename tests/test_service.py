@@ -173,3 +173,18 @@ def test_a_step_that_did_not_finish_marks_the_result_partial(service):
     request = Request("/tmp/corvus/hello-bundle.exe", "executable/windows/pe64")
     service("single_file_bundle").execute(request)
     assert request.partial_result
+
+
+def test_a_script_named_by_its_hash_is_given_to_corvus_with_its_extension(service, tmp_path):
+    script = tmp_path / "1512fcc7"
+    script.write_text("console.log(1);\n")
+    corvus, seen = service("source_map"), []
+    real = corvus.run
+
+    def run(args, kill_after):
+        seen.append(args[3])
+        return real(args, kill_after)
+
+    corvus.run = run
+    corvus.execute(Request(str(script), "code/javascript"))
+    assert seen[0].endswith("/1512fcc7.js")

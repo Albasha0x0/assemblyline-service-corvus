@@ -1,8 +1,13 @@
 """The corvus batch command lines and the time limits they run under."""
 
+import os
+import shutil
 from typing import List, Optional, Tuple
 
 CORVUS = "/opt/corvus/corvus"
+
+# Assemblyline types whose files Corvus reads as such only under these extensions.
+EXTENSIONS = {"code/javascript": (".js", ".mjs", ".cjs")}
 
 # Exit codes of corvus batch that still write a document.
 EXIT_OK = 0
@@ -43,6 +48,20 @@ def command(
         "--limit", f"containerFiles={container_files}",
         "--limit", f"strings={strings}",
     ]
+
+
+def named(path: str, file_type: str, folder: str) -> str:
+    """Returns path, or a link to it in folder under the extension its type needs when the name lacks one; the
+    file is copied when a link cannot be made."""
+    extensions = EXTENSIONS.get(file_type)
+    if not extensions or path.lower().endswith(extensions):
+        return path
+    target = os.path.join(folder, os.path.basename(path) + extensions[0])
+    try:
+        os.symlink(path, target)
+    except OSError:
+        shutil.copyfile(path, target)
+    return target
 
 
 def steps_budget(service_timeout: int, elapsed: float, count: int) -> Optional[Tuple[int, int]]:
