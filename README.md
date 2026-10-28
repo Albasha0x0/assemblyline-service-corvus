@@ -64,6 +64,9 @@ python3 scripts/pin_corvus.py --version 2.8.0 --sums SHA256SUMS
 docker build --build-arg version=4.7.4.dev0 -t assemblyline-service-corvus:dev .
 ```
 
+- A `v4.x.y.stableN` or `v4.x.y.devN` tag pushes `ghcr.io/<owner>/assemblyline-service-corvus` as that version and as `stable` or `dev`.
+- Check an image's build provenance: `gh attestation verify oci://<image>:<version> --repo <owner>/assemblyline-service-corvus`.
+
 ## Tests
 
 ```sh

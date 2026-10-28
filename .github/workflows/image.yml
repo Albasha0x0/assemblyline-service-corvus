@@ -1,0 +1,62 @@
+name: image
+
+# A tag such as v4.7.4.stable1 builds the service image, runs the unit tests in it, pushes it to ghcr.io as that
+# version and stable, and attests its SLSA build provenance.
+on:
+  push:
+    tags: ["v4.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to rebuild, such as v4.7.4.stable1
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # id-token signs the attestation (Sigstore); attestations and packages store it beside the image.
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
+          persist-credentials: false
+      - name: Build
+        run: |
+          version="${TAG#v}"
+          [[ "$version" =~ ^4\.[0-9]+\.[0-9]+\.(stable|dev)[0-9]+$ ]] || { echo "tag $TAG is not v4.x.y.stableN or v4.x.y.devN" >&2; exit 1; }
+          docker build --build-arg "version=$version" -t service:build .
+      - name: Unit tests in the image
+        run: |
+          docker run --rm -v "$PWD:/src:ro" -w /src -e PYTHONDONTWRITEBYTECODE=1 service:build \
+            sh -c "pip install -q --user pytest==9.1.1 && python -m pytest -q -p no:cacheprovider tests"
+      - name: Push
+        id: push
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/assemblyline-service-corvus"; version="${TAG#v}"
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker tag service:build "$image:$version"
+          channel="${version#*.*.*.}"; channel="${channel%%[0-9]*}"
+          docker tag service:build "$image:$channel"
+          docker push "$image:$version" && docker push "$image:$channel"
+          digest=$(docker inspect --format '{{index .RepoDigests 0}}' "$image:$version")
+          echo "name=$image" >> "$GITHUB_OUTPUT"; echo "digest=${digest#*@}" >> "$GITHUB_OUTPUT"
+      # `gh attestation verify oci://<image>:<version> --repo <owner/name>` checks it.
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ${{ steps.push.outputs.name }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
