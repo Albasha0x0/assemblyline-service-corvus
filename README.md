@@ -4,10 +4,12 @@ Runs `corvus batch --file <path> --json` ([Corvus](https://github.com/Albasha0x0
 `corvus.batch/1` document to result sections. Nothing in the file runs; Corvus is offline. The document is attached
 as `corvus.batch.json`.
 
-A second `corvus batch` session then writes out the files Corvus recovers, added as extracted files:
+A second `corvus batch` session then reads the file's packing and toolchain facts and writes out the files Corvus
+recovers, added as extracted files:
 
-| Step | Runs when | Extracted files |
+| Step | Runs when | Reads or writes |
 |---|---|---|
+| `summarize_file view=all` | always | packers, transformation tools, compiler, libraries |
 | `unpack_container extractOnly=true` | the summary names a container, or the file is JavaScript | members, by their path in the container |
 | `extract_embedded save=true` | the file is or holds .NET assemblies | decoded resources, byte arrays and literals, with their encoding chain |
 
@@ -19,6 +21,7 @@ A second `corvus batch` session then writes out the files Corvus recovers, added
 | Container: *label* | `container`: member paths and details | heuristic 1, signature = container label |
 | .NET outline | `summary.assemblies`, `summary.entryPoints` | — |
 | Typed strings | `strings`: type, value, count, first location | `network.static.uri`, `network.static.domain`, `network.static.ip`, `network.email.address`, `file.path`, `dynamic.registry_key`, `dynamic.mutex`, `network.user_agent` |
+| Packing and toolchain | packers and hardening tools; .NET transformation tools; Go or Rust compiler; imported and bundled libraries | `technique.packer`, `technique.obfuscation`, `file.compiler`, `file.lib`; a possible packer is shown untagged |
 | Files not extracted | files past `max_extracted`, and files past the `container_files` page limit | — |
 | Incomplete reading | sections `partial`, `unavailable`, `error` or `timeout`, with Corvus's limit or reason; steps with an error or no output | — |
 

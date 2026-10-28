@@ -1,0 +1,117 @@
+{
+ "schema": "corvus.batch/1",
+ "corvus": "2.7.2",
+ "file": {
+  "path": "/tmp/corvus/Marker.dll",
+  "size": 4096,
+  "sha256": "f6cf9696be3da4ac55e63f3330417aa448a21d4e898aa08e1141a6299b1f8ff8",
+  "type": ".NET assembly"
+ },
+ "complete": true,
+ "limits": {
+  "timeSeconds": 120,
+  "containerFiles": 500,
+  "strings": 500,
+  "yaraMatches": 500,
+  "assetBytes": 1073741824,
+  "summaryHighlights": 25
+ },
+ "sections": [
+  {
+   "name": "summary",
+   "tool": "summarize_file",
+   "status": "complete",
+   "result": {
+    "path": "/tmp/corvus/Marker.dll",
+    "size": 4096,
+    "type": ".NET assembly",
+    "sha256": "f6cf9696be3da4ac55e63f3330417aa448a21d4e898aa08e1141a6299b1f8ff8",
+    "container": "none (plain .NET assembly)",
+    "view": "overview",
+    "views": [
+     "overview",
+     "managed",
+     "all"
+    ],
+    "md5": "c794f1daa8bd0ec7d9280c1e140e6250",
+    "sha1": "fd97d2ce996844e898345011ee429814a2d27e32",
+    "entropy": 3.78,
+    "assemblies": [
+     {
+      "path": "Marker.dll",
+      "name": "Marker",
+      "kind": "library",
+      "architecture": "AnyCPU",
+      "features": 0,
+      "version": "1.0.0.0",
+      "framework": ".NETCoreApp,Version=v10.0"
+     }
+    ],
+    "highlights": [
+     "Transformed with ConfuserEx (marker: ConfusedByAttribute).",
+     "Network values: 1 url, 1 domain."
+    ],
+    "values": {
+     "url": 1,
+     "domain": 1
+    }
+   }
+  },
+  {
+   "name": "container",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "The file is not a container."
+  },
+  {
+   "name": "strings",
+   "tool": "extract_strings",
+   "status": "complete",
+   "result": {
+    "assembly": "Marker.dll",
+    "items": [
+     {
+      "type": "url",
+      "value": "https://example.com/api/items",
+      "count": 1,
+      "locations": [
+       "Marker.Program::get_Endpoint() @IL_0000"
+      ],
+      "passedTo": []
+     },
+     {
+      "type": "domain",
+      "value": "example.com",
+      "count": 1,
+      "locations": [
+       "Marker.Program::get_Endpoint() @IL_0000"
+      ],
+      "passedTo": []
+     }
+    ],
+    "offset": 0,
+    "total": 2,
+    "byType": {
+     "url": 1,
+     "domain": 1
+    },
+    "valuesResultId": "r-fad797766872",
+    "limit": 500,
+    "totalExact": true,
+    "hasMore": false
+   }
+  },
+  {
+   "name": "yara",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "No rules were given; --rules names a rule file or folder."
+  },
+  {
+   "name": "build",
+   "tool": "summarize_build",
+   "status": "not_applicable",
+   "reason": "A build with asset files is read from a folder, package or zip that holds it."
+  }
+ ]
+}

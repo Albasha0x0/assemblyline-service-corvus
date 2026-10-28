@@ -103,7 +103,8 @@ def _incomplete(document: Dict[str, Any]) -> List[str]:
     return lines
 
 
-def _summary(document: Dict[str, Any], summary: Dict[str, Any], strings: Dict[str, Any], complete: bool) -> ResultSection:
+def _summary(document: Dict[str, Any], summary: Dict[str, Any], strings: Dict[str, Any],
+             complete: bool) -> ResultSection:
     facts = _result(summary)
     file = document.get("file") or {}
     kv = ResultKeyValueSection("Corvus file summary")
@@ -182,6 +183,18 @@ def _strings(strings: Dict[str, Any]) -> Optional[ResultSection]:
         table.add_row(TableRow({"Type": kind, "Value": value, "Count": item.get("count"), "Location": where}))
         if kind in STRING_TAGS and isinstance(value, str):
             table.add_tag(STRING_TAGS[kind], value)
+    return table
+
+
+def toolchain(facts: Sequence[Any]) -> Optional[ResultSection]:
+    """Returns the table of packing and toolchain facts (steps.Fact), each tagged with its tag; None for none."""
+    if not facts:
+        return None
+    table = ResultTableSection(f"Packing and toolchain ({len(facts)})")
+    for fact in facts:
+        table.add_row(TableRow({"Kind": fact.kind, "Value": fact.value, "Source": fact.source}))
+        if fact.tag:
+            table.add_tag(fact.tag, fact.value)
     return table
 
 

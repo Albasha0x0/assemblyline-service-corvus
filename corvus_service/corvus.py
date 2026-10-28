@@ -33,7 +33,8 @@ class Corvus(ServiceBase):
     def start(self):
         # Read once: Assemblyline asks for the tool version on every task and keys its result cache on it.
         try:
-            self.tool_version = subprocess.run([self.corvus, "version"], capture_output=True, text=True, timeout=60).stdout.strip()
+            done = subprocess.run([self.corvus, "version"], capture_output=True, text=True, timeout=60)
+            self.tool_version = done.stdout.strip()
         except (OSError, subprocess.SubprocessError):
             self.tool_version = "unknown"
 
@@ -61,7 +62,8 @@ class Corvus(ServiceBase):
         outcome = self.run_steps(request, document, timeout, time.monotonic() - started)
         max_extracted = int(request.max_extracted or 0)
         unadded = self.add_extracted(request, outcome.files)
-        more = [s for s in (results.not_extracted(outcome.unlisted, unadded, max_extracted),) if s is not None]
+        built = (results.toolchain(outcome.facts), results.not_extracted(outcome.unlisted, unadded, max_extracted))
+        more = [s for s in built if s is not None]
 
         result = Result()
         for section in results.sections(document, more, outcome.unread):
@@ -77,8 +79,6 @@ class Corvus(ServiceBase):
         unpacked = tempfile.mkdtemp(prefix="unpacked-", dir=work)
         embedded = tempfile.mkdtemp(prefix="embedded-", dir=work)
         planned = steps.plan(request.file_path, document, request.file_type or "", unpacked, embedded, limit)
-        if not planned:
-            return steps.Outcome([], [], [])
         budget = runner.steps_budget(timeout, elapsed, len(planned))
         if budget is None:
             return steps.outcome({}, planned, steps.NO_TIME)

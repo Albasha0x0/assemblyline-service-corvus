@@ -3,7 +3,8 @@ version: $SERVICE_TAG
 description: >-
   Reads executables, packages and archives with Corvus: container members (including .NET single-file
   bundles, PyInstaller, Nuitka and Il2Cpp builds), the .NET outline and typed strings from .NET
-  assemblies. Members and decoded payloads are added as extracted files. Nothing in the file runs.
+  assemblies, packers, transformation tools, compilers and libraries. Members and decoded payloads are
+  added as extracted files. Nothing in the file runs.
 
 accepts: executable/windows/.*|executable/linux/.*|android/apk|java/jar|archive/zip
 rejects: empty|metadata/.*|executable/windows/dos|executable/windows/com

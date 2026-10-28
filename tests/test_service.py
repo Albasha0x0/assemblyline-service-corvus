@@ -49,16 +49,19 @@ if "--file" in args:
     print(open(os.path.join(documents, name + ".json"), encoding="utf-8").read()); sys.exit({code})
 recording = os.path.join(documents, f"{{name}}.steps.jsonl")
 recorded = [json.loads(l) for l in open(recording, encoding="utf-8")] if os.path.exists(recording) else []
+for l in recorded:
+    l["view"] = (l["structured"] or {{}}).get("view")
 for index, text in enumerate(open(args[1], encoding="utf-8"), 1):
     step = json.loads(text)
-    line = next((l for l in recorded if l["tool"] == step["tool"]), None)
+    line = next((l for l in recorded if l["tool"] == step["tool"] and l["view"] == step["args"].get("view")), None)
     if line is None:
         continue
-    folder = line["structured"]["outputDirectory"]
-    line = json.loads(json.dumps(line).replace(folder, step["args"]["outputDirectory"]))
+    folder = line["structured"].get("outputDirectory")
+    if folder:
+        line = json.loads(json.dumps(line).replace(folder, step["args"]["outputDirectory"]))
     line["step"] = index
     out = line["structured"]
-    for item in out["items"]:
+    for item in out.get("items", []) if folder else []:
         path = item.get("savedTo") or os.path.join(out["outputDirectory"], item["path"])
         os.makedirs(os.path.dirname(path), exist_ok=True)
         open(path, "w", encoding="utf-8").write(item.get("sha256", ""))
@@ -143,3 +146,10 @@ def test_a_step_corvus_did_not_answer_is_named_under_incomplete_reading(service)
     service("single_file_bundle").execute(request)
     incomplete = next(s for s in request.result.sections if s.title_text == "Incomplete reading")
     assert "unpack: not run; corvus wrote no output for it" in incomplete.body.splitlines()
+
+
+def test_a_packer_corvus_names_is_tagged(service):
+    request = Request("/tmp/corvus/hello-packed", "executable/linux/elf64")
+    service("packed_elf").execute(request)
+    section = next(s for s in request.result.sections if s.title_text == "Packing and toolchain (1)")
+    assert section.tags == {"technique.packer": ["UPX"]}

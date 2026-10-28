@@ -1,0 +1,75 @@
+{
+ "schema": "corvus.batch/1",
+ "corvus": "2.7.2",
+ "file": {
+  "path": "/tmp/corvus/hello-go",
+  "size": 1763318,
+  "sha256": "601fec5f27a25056d1019ccd9e22d01a6df94b0b450a094f537559ac0eb3b4c2",
+  "type": "elf"
+ },
+ "complete": true,
+ "limits": {
+  "timeSeconds": 120,
+  "containerFiles": 500,
+  "strings": 500,
+  "yaraMatches": 500,
+  "assetBytes": 1073741824,
+  "summaryHighlights": 25
+ },
+ "sections": [
+  {
+   "name": "summary",
+   "tool": "summarize_file",
+   "status": "complete",
+   "result": {
+    "path": "/tmp/corvus/hello-go",
+    "size": 1763318,
+    "type": "elf",
+    "sha256": "601fec5f27a25056d1019ccd9e22d01a6df94b0b450a094f537559ac0eb3b4c2",
+    "container": "none",
+    "view": "overview",
+    "views": [
+     "overview",
+     "dependencies",
+     "go",
+     "native",
+     "all"
+    ],
+    "md5": "6be9da6f73195f8f6e578f8ca83614e4",
+    "sha1": "609d2acac415b2da2d14ed4809fe6acf7f3b3346",
+    "entropy": 6.77,
+    "highlights": [
+     "Go program built with go1.18.1, module example.com/hello (devel), 0 dependencies, linux/amd64, revision 59c366186df3f20b267102594c356d7df68f5cd5 (modified)."
+    ],
+    "notes": [
+     "Not a known container (elf) and no embedded .NET images were found.",
+     "No managed assemblies inside: nothing to summarize beyond the file facts."
+    ]
+   }
+  },
+  {
+   "name": "container",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "The file is not a container."
+  },
+  {
+   "name": "strings",
+   "tool": "extract_strings",
+   "status": "not_applicable",
+   "reason": "Typed strings are read from .NET assemblies, files that hold them, and serialized asset files."
+  },
+  {
+   "name": "yara",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "No rules were given; --rules names a rule file or folder."
+  },
+  {
+   "name": "build",
+   "tool": "summarize_build",
+   "status": "not_applicable",
+   "reason": "A build with asset files is read from a folder, package or zip that holds it."
+  }
+ ]
+}

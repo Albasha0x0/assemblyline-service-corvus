@@ -1,11 +1,16 @@
-"""The corvus calls made after corvus batch --file, in one session: the files Corvus writes out."""
+"""The corvus calls made after corvus batch --file, in one session: the file's packing and toolchain facts and
+the files Corvus writes out."""
 
 import json
 import os
 from typing import Any, Dict, List, NamedTuple, Optional, Tuple
 
+FACTS = "facts"
 UNPACK = "unpack"
 EMBEDDED = "embedded"
+
+# Packer finding kinds that name a tool; a "suspicious" finding names none.
+PACKER_KINDS = ("packing tool", "hardening tool")
 
 
 class Extracted(NamedTuple):
@@ -16,10 +21,20 @@ class Extracted(NamedTuple):
     description: str
 
 
-class Outcome(NamedTuple):
-    """What the steps wrote: files to add, lines naming files past Corvus's page limit, and one line per step
-    that did not finish."""
+class Fact(NamedTuple):
+    """A packing or toolchain fact, the Assemblyline tag it sets (None for none) and where Corvus read it."""
 
+    kind: str
+    value: str
+    source: str
+    tag: Optional[str]
+
+
+class Outcome(NamedTuple):
+    """What the steps read and wrote: facts, files to add, lines naming files past Corvus's page limit, and one
+    line per step that did not finish."""
+
+    facts: List[Fact]
     files: List[Extracted]
     unlisted: List[str]
     unread: List[str]
@@ -40,9 +55,10 @@ def _summary(document: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
 
 def plan(path: str, document: Dict[str, Any], file_type: str, unpacked: str, embedded: str,
          limit: int) -> List[Tuple[str, Dict[str, Any]]]:
-    """Returns the named steps that apply to the file, as corvus batch step records; empty when none applies."""
+    """Returns the named steps that apply to the file, as corvus batch step records; the facts step always
+    applies."""
     summary, container = _summary(document)
-    planned = []
+    planned = [(FACTS, {"tool": "summarize_file", "args": {"path": path, "view": "all"}})]
     # The summary names no container for a source-mapped script, which unpack_container still reads.
     if container != "not_applicable" or file_type.startswith("code/javascript"):
         planned.append((UNPACK, {"tool": "unpack_container", "args": {
@@ -102,6 +118,51 @@ def _payloads(line: Optional[Dict[str, Any]]) -> List[Extracted]:
     return files
 
 
+def _list(value: Any) -> List[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _dict(value: Any) -> Dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def facts(line: Optional[Dict[str, Any]]) -> List[Fact]:
+    """Returns the packers, transformation tools, compilers and libraries of a summarize_file view=all line, each
+    once, in that order; empty for no line."""
+    detail = _dict(_structured(line).get("detail"))
+    native, found = _dict(detail.get("native")), []
+    for packer in map(_dict, _list(native.get("packers"))):
+        if packer.get("kind") in PACKER_KINDS and isinstance(packer.get("name"), str):
+            evidence = f"{packer['kind']}: {packer.get('evidence')}"
+            found.append(Fact("packer", packer["name"], evidence, "technique.packer"))
+        elif isinstance(packer.get("evidence"), str):
+            found.append(Fact("possible packer", packer["evidence"], "packer heuristics", None))
+    for assembly in map(_dict, _list(_dict(detail.get("managed")).get("assemblies"))):
+        markers, where = _dict(assembly.get("markers")), str(assembly.get("path") or "the assembly")
+        # A transformer finding names the tool its marker list also names, under its own wording.
+        names = [_dict(t).get("name") for t in _list(markers.get("transformers"))] or _list(markers.get("tools"))
+        found += [Fact("transformation tool", n, where, "technique.obfuscation") for n in names if isinstance(n, str)]
+    go = _dict(detail.get("go"))
+    if isinstance(go.get("goVersion"), str):
+        found.append(Fact("compiler", go["goVersion"], "Go build information", "file.compiler"))
+    rust = _dict(detail.get("rust"))
+    if isinstance(rust.get("rustcCommit"), str):
+        found.append(Fact("compiler", f"rustc {rust['rustcCommit']}", "Rust standard library paths", "file.compiler"))
+    image = _dict(native.get("image"))
+    found += [Fact("library", n, "imported by the image", "file.lib") for n in _list(image.get("dependencies"))
+              if isinstance(n, str)]
+    for component in map(_dict, _list(_dict(detail.get("dependencies")).get("components"))):
+        value = component.get("purl") or component.get("name")
+        if component.get("type") == "library" and isinstance(value, str):
+            found.append(Fact("library", value, str(component.get("source") or "dependencies"), "file.lib"))
+    seen, unique = set(), []
+    for fact in found:
+        if (fact.kind, fact.value) not in seen:
+            seen.add((fact.kind, fact.value))
+            unique.append(fact)
+    return unique
+
+
 def _past_limit(name: str, line: Optional[Dict[str, Any]]) -> List[str]:
     """Returns a line naming how many files Corvus did not list past its page limit, or nothing."""
     structured = _structured(line)
@@ -118,8 +179,9 @@ NO_TIME = "no time was left after corvus batch --file"
 
 def outcome(lines: Dict[str, Dict[str, Any]], planned: List[Tuple[str, Dict[str, Any]]],
             missing: str = NO_OUTPUT) -> Outcome:
-    """Returns the files the steps wrote that exist on disk, the rows past the page limit, and one line per step
-    that wrote no output, named with missing, or reported an error."""
+    """Returns the facts, the files the steps wrote that exist on disk, the rows past the page limit, and one line
+    per step that wrote no output, named with missing, or reported an error."""
+    found: List[Fact] = []
     files: List[Extracted] = []
     unlisted: List[str] = []
     unread: List[str] = []
@@ -132,7 +194,10 @@ def outcome(lines: Dict[str, Dict[str, Any]], planned: List[Tuple[str, Dict[str,
             error = line.get("error") if isinstance(line.get("error"), dict) else {}
             unread.append(f"{name}: {error.get('code') or 'error'}; {error.get('message') or 'no reason given'}")
             continue
-        found = _members(line) if name == UNPACK else _payloads(line)
-        files += [f for f in found if os.path.isfile(f.path)]
+        if name == FACTS:
+            found = facts(line)
+            continue
+        written = _members(line) if name == UNPACK else _payloads(line)
+        files += [f for f in written if os.path.isfile(f.path)]
         unlisted += _past_limit(name, line)
-    return Outcome(files, unlisted, unread)
+    return Outcome(found, files, unlisted, unread)

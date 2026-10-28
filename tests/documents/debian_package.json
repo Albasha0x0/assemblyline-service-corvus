@@ -4,7 +4,7 @@
  "file": {
   "path": "/tmp/corvus/hello.deb",
   "size": 548,
-  "sha256": "db6b6bd708a5a1144f48d4eb882d62e3ce81e746199566e88db80bf29b1b8234",
+  "sha256": "d40f9adb177279849234750c08d9da0a4ff17d4ae1eb3a07d6a7a5460f292958",
   "type": "data"
  },
  "complete": true,
@@ -25,16 +25,16 @@
     "path": "/tmp/corvus/hello.deb",
     "size": 548,
     "type": "data",
-    "sha256": "db6b6bd708a5a1144f48d4eb882d62e3ce81e746199566e88db80bf29b1b8234",
+    "sha256": "d40f9adb177279849234750c08d9da0a4ff17d4ae1eb3a07d6a7a5460f292958",
     "container": "debian package",
     "view": "overview",
     "views": [
      "overview",
      "all"
     ],
-    "md5": "616ab33704186903fe29102e3edb5b89",
-    "sha1": "17c62344ad997305c979fe915acba0120fb8e81f",
-    "entropy": 6.82,
+    "md5": "6c51fff92546646cbfa642ed377c5218",
+    "sha1": "79ed7bb4920f9e418b02812fd9d1ddd44caece4d",
+    "entropy": 6.83,
     "notes": [
      "debian package hello 1.0.0 (all); Notes file (format 2.0)",
      "data.tar.zst: 1 of 1 files not extracted (not binaries or packages; allFiles extracts every file).",

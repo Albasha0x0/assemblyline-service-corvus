@@ -1,0 +1,74 @@
+{
+ "schema": "corvus.batch/1",
+ "corvus": "2.7.2",
+ "file": {
+  "path": "/tmp/corvus/hello-packed",
+  "size": 355020,
+  "sha256": "09b95a6844645c875f43c9d9a6b81f7fdda0a18f7b7eab418136632af7739ea4",
+  "type": "elf"
+ },
+ "complete": true,
+ "limits": {
+  "timeSeconds": 120,
+  "containerFiles": 500,
+  "strings": 500,
+  "yaraMatches": 500,
+  "assetBytes": 1073741824,
+  "summaryHighlights": 25
+ },
+ "sections": [
+  {
+   "name": "summary",
+   "tool": "summarize_file",
+   "status": "complete",
+   "result": {
+    "path": "/tmp/corvus/hello-packed",
+    "size": 355020,
+    "type": "elf",
+    "sha256": "09b95a6844645c875f43c9d9a6b81f7fdda0a18f7b7eab418136632af7739ea4",
+    "container": "none",
+    "view": "overview",
+    "views": [
+     "overview",
+     "native",
+     "all"
+    ],
+    "md5": "e36ca96616436b2b1741956fdad92bb4",
+    "sha1": "5e335053b2f8f2389fe798b2b77e613d6cbf4220",
+    "entropy": 7.91,
+    "highlights": [
+     "ELF without section headers: sections are read from the load segments.",
+     "Packed with UPX (packing tool): l_info at file 0xE8 (UPX! version 13, linux/amd64), p_info: unpacked size 900,368 bytes; UPX! trailer at file 0x56AA8; stub string \"$Info: This file is packed with the UPX executable packer\" at file 0x4ED03."
+    ],
+    "notes": [
+     "Not a known container (elf) and no embedded .NET images were found.",
+     "No managed assemblies inside: nothing to summarize beyond the file facts."
+    ]
+   }
+  },
+  {
+   "name": "container",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "The file is not a container."
+  },
+  {
+   "name": "strings",
+   "tool": "extract_strings",
+   "status": "not_applicable",
+   "reason": "Typed strings are read from .NET assemblies, files that hold them, and serialized asset files."
+  },
+  {
+   "name": "yara",
+   "tool": "search_container",
+   "status": "not_applicable",
+   "reason": "No rules were given; --rules names a rule file or folder."
+  },
+  {
+   "name": "build",
+   "tool": "summarize_build",
+   "status": "not_applicable",
+   "reason": "A build with asset files is read from a folder, package or zip that holds it."
+  }
+ ]
+}

@@ -4,7 +4,7 @@
  "file": {
   "path": "/tmp/corvus/Settings.dll",
   "size": 5120,
-  "sha256": "13cc75f553bfa0c8a9982d380c6d60f254cc4a32ba36f8053b419b5225cba7ca",
+  "sha256": "d5c941f5bf681912d1d52dec2612213a39f9ebc4baa355c6fce42e43af37ab63",
   "type": ".NET assembly"
  },
  "complete": true,
@@ -25,7 +25,7 @@
     "path": "/tmp/corvus/Settings.dll",
     "size": 5120,
     "type": ".NET assembly",
-    "sha256": "13cc75f553bfa0c8a9982d380c6d60f254cc4a32ba36f8053b419b5225cba7ca",
+    "sha256": "d5c941f5bf681912d1d52dec2612213a39f9ebc4baa355c6fce42e43af37ab63",
     "container": "none (plain .NET assembly)",
     "view": "overview",
     "views": [
@@ -33,8 +33,8 @@
      "managed",
      "all"
     ],
-    "md5": "ced3a27dc0cfeb3a552bdf47e8ac80ad",
-    "sha1": "4807ecdb6d24bd3968ee7d5424e68d60f23cfbe9",
+    "md5": "e48b04182d23ebb1666bc91a8fc3f134",
+    "sha1": "2a63e142d5e13c8a80ff2854f8e2adc9dc8aa856",
     "entropy": 3.95,
     "assemblies": [
      {
