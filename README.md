@@ -60,6 +60,7 @@ The image installs the Corvus linux-x64 release named by `CORVUS_VERSION`. Its S
 and the release's `SHA256SUMS` line; change both arguments together.
 
 ```sh
+python3 scripts/pin_corvus.py --version 2.8.0 --sums SHA256SUMS
 docker build --build-arg version=4.7.4.dev0 -t assemblyline-service-corvus:dev .
 ```
 
