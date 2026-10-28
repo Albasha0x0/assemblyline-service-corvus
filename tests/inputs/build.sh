@@ -1,6 +1,6 @@
 #!/bin/sh
 # Builds the files tests/documents were recorded from into the folder given (default tests/inputs/build).
-# Requires gcc, upx, go, dpkg-deb and the .NET 10 SDK.
+# Requires gcc, upx, go, dpkg-deb, cpio, wixl (msitools), python3 and the .NET 10 SDK.
 set -e
 here=$(cd "$(dirname "$0")" && pwd)
 out=$(mkdir -p "${1:-$here/build}" && cd "${1:-$here/build}" && pwd)
@@ -27,3 +27,11 @@ upx -q -q "$out/hello-packed" > /dev/null
 
 dotnet build -c Release -v q -o "$work/marker" "$here/marker/Marker.csproj" > /dev/null
 cp "$work/marker/Marker.dll" "$out/"
+
+mkdir -p "$work/tree/usr/share/hello"
+cp "$here/notes.txt" "$work/tree/usr/share/hello/"
+(cd "$work/tree" && find . | cpio -o -H newc --quiet) > "$out/hello.cpio"
+
+(cd "$here" && wixl -o "$out/hello.msi" hello.wxs)
+
+python3 -I "$here/archives.py" "$out"

@@ -35,6 +35,13 @@ recovers, added as extracted files:
 
 - Il2Cpp type outline, typed strings of bundled assemblies and advisories: not in `corvus.batch/1`.
 
+## Accepted files
+
+- Types: `executable/windows/*`, `executable/linux/*` (AppImage included), `android/apk`, `java/jar`, `archive/zip`
+  (`.aab` included), `archive/ar` (`.deb`, `.a`), `archive/asar`, `archive/cpio`, `document/installer/windows`
+  (`.msi`), `code/javascript`.
+- `.rpm`: read by Corvus, but Assemblyline 4.7 identify gives it no type, so it is not routed here.
+
 ## Configuration
 
 | Setting | Default | Meaning |

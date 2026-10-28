@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="Hello" Language="1033" Version="1.0.0" Manufacturer="Example" UpgradeCode="5c3a7a9e-3f1e-4b8e-9d1c-2a6b0f4e8c11">
+    <Package InstallerVersion="200" Compressed="yes" />
+    <Media Id="1" Cabinet="hello.cab" EmbedCab="yes" />
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLDIR" Name="Hello">
+          <Component Id="Notes" Guid="0b6e2f3a-7c4d-4e5f-8a9b-1c2d3e4f5a6b">
+            <File Id="NotesFile" Name="notes.txt" Source="notes.txt" />
+          </Component>
+        </Directory>
+      </Directory>
+    </Directory>
+    <Feature Id="Main" Level="1">
+      <ComponentRef Id="Notes" />
+    </Feature>
+  </Product>
+</Wix>

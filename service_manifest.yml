@@ -1,12 +1,13 @@
 name: Corvus
 version: $SERVICE_TAG
 description: >-
-  Reads executables, packages and archives with Corvus: container members (including .NET single-file
+  Reads executables, packages, archives, installers and scripts with Corvus: container members (including .NET single-file
   bundles, PyInstaller, Nuitka and Il2Cpp builds), the .NET outline and typed strings from .NET
   assemblies, packers, transformation tools, compilers and libraries. Members and decoded payloads are
   added as extracted files. Nothing in the file runs.
 
-accepts: executable/windows/.*|executable/linux/.*|android/apk|java/jar|archive/zip
+# AppImage is typed executable/linux, .aab archive/zip, a .deb archive/ar; Assemblyline 4.7 gives an .rpm no type.
+accepts: executable/windows/.*|executable/linux/.*|android/apk|java/jar|archive/zip|archive/ar|archive/asar|archive/cpio|document/installer/windows|code/javascript
 rejects: empty|metadata/.*|executable/windows/dos|executable/windows/com
 
 stage: CORE
