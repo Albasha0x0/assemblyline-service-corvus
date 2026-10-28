@@ -37,7 +37,7 @@ class Request:
 
 
 # Stands in for corvus: prints a recorded document for batch --file, and for a steps file prints the recorded
-# step lines with their folders moved to the ones asked for, writing each file a line names.
+# step lines with their folders moved to the ones asked for, writing each file a line names and the SBOM.
 FAKE = """#!{python}
 import json, os, sys
 args, documents, name = sys.argv[1:], {documents!r}, {document!r}
@@ -60,6 +60,8 @@ for index, text in enumerate(open(args[1], encoding="utf-8"), 1):
     if folder:
         line = json.loads(json.dumps(line).replace(folder, step["args"]["outputDirectory"]))
     line["step"] = index
+    if "sbomPath" in step["args"]:
+        open(step["args"]["sbomPath"], "w", encoding="utf-8").write("{{}}")
     out = line["structured"]
     for item in out.get("items", []) if folder else []:
         path = item.get("savedTo") or os.path.join(out["outputDirectory"], item["path"])
@@ -153,3 +155,9 @@ def test_a_packer_corvus_names_is_tagged(service):
     service("packed_elf").execute(request)
     section = next(s for s in request.result.sections if s.title_text == "Packing and toolchain (1)")
     assert section.tags == {"technique.packer": ["UPX"]}
+
+
+def test_the_sbom_is_attached_as_a_supplementary_file(service):
+    request = Request("/tmp/corvus/hello-go", "executable/linux/elf64")
+    service("go_program").execute(request)
+    assert [name for _, name, _ in request.supplementary] == ["corvus.batch.json", "corvus.cdx.json"]

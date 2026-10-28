@@ -2,7 +2,7 @@
 
 Runs `corvus batch --file <path> --json` ([Corvus](https://github.com/Albasha0x0/Corvus)) on each file and maps the
 `corvus.batch/1` document to result sections. Nothing in the file runs; Corvus is offline. The document is attached
-as `corvus.batch.json`.
+as `corvus.batch.json`; a CycloneDX 1.6 SBOM, where Corvus reads the file's dependencies, as `corvus.cdx.json`.
 
 A second `corvus batch` session then reads the file's packing and toolchain facts and writes out the files Corvus
 recovers, added as extracted files:
@@ -12,6 +12,7 @@ recovers, added as extracted files:
 | `summarize_file view=all` | always | packers, transformation tools, compiler, libraries |
 | `unpack_container extractOnly=true` | the summary names a container, or the file is JavaScript | members, by their path in the container |
 | `extract_embedded save=true` | the file is or holds .NET assemblies | decoded resources, byte arrays and literals, with their encoding chain |
+| `summarize_file view=dependencies sbomPath=...` | the summary lists the `dependencies` view | `corvus.cdx.json` |
 
 ## Result sections
 
@@ -32,7 +33,7 @@ recovers, added as extracted files:
 
 ## Not mapped
 
-- Il2Cpp type outline, typed strings of bundled assemblies, SBOM and advisories: not in `corvus.batch/1`.
+- Il2Cpp type outline, typed strings of bundled assemblies and advisories: not in `corvus.batch/1`.
 
 ## Configuration
 

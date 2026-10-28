@@ -15,7 +15,7 @@ def recorded(name, root=None):
 
 
 def planned(name, file_type=""):
-    return steps.plan("/tmp/corvus/f", load(name), file_type, "/out/unpacked", "/out/embedded", 100)
+    return steps.plan("/tmp/corvus/f", load(name), file_type, "/out/unpacked", "/out/embedded", "/out/sbom.json", 100)
 
 
 def written(root, lines):
@@ -138,3 +138,18 @@ def test_a_possible_packer_is_shown_without_a_tag():
 def test_the_libraries_an_image_imports_are_tagged_once():
     line = {"structured": {"detail": {"native": {"image": {"dependencies": ["libc.so.6", "libc.so.6"]}}}}}
     assert [(f.kind, f.value, f.tag) for f in steps.facts(line)] == [("library", "libc.so.6", "file.lib")]
+
+
+def test_a_file_with_a_dependencies_view_has_its_sbom_written():
+    assert planned("go_program")[1:] == [(steps.SBOM, {"tool": "summarize_file", "args": {
+        "path": "/tmp/corvus/f", "view": "dependencies", "sbomPath": "/out/sbom.json", "overwrite": True}})]
+    assert [n for n, _ in planned("debian_package")] == [steps.FACTS, steps.UNPACK]
+
+
+def test_the_sbom_is_kept_only_when_corvus_wrote_it(tmp_path):
+    plan = steps.plan("/tmp/corvus/f", load("go_program"), "", "", "", str(tmp_path / "sbom.json"), 100)
+    lines = by_name(recorded("go_program"), plan)
+    assert steps.outcome(lines, plan).sbom is None
+    assert steps.outcome(lines, plan).unread == ["sbom: no file; corvus reported no error and wrote no SBOM"]
+    (tmp_path / "sbom.json").write_text("{}")
+    assert steps.outcome(lines, plan).sbom == str(tmp_path / "sbom.json")

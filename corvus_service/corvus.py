@@ -16,6 +16,7 @@ from assemblyline_v4_service.common.task import MaxExtractedExceeded
 from corvus_service import results, runner, steps
 
 DOCUMENT_NAME = "corvus.batch.json"
+SBOM_NAME = "corvus.cdx.json"
 
 
 class CorvusError(RuntimeError):
@@ -60,6 +61,8 @@ class Corvus(ServiceBase):
         request.add_supplementary(path, DOCUMENT_NAME, f"{results.SCHEMA} document written by Corvus")
 
         outcome = self.run_steps(request, document, timeout, time.monotonic() - started)
+        if outcome.sbom:
+            request.add_supplementary(outcome.sbom, SBOM_NAME, "CycloneDX 1.6 SBOM written by Corvus")
         max_extracted = int(request.max_extracted or 0)
         unadded = self.add_extracted(request, outcome.files)
         built = (results.toolchain(outcome.facts), results.not_extracted(outcome.unlisted, unadded, max_extracted))
@@ -78,7 +81,8 @@ class Corvus(ServiceBase):
         limit = int(self.config.get("container_files", 500))
         unpacked = tempfile.mkdtemp(prefix="unpacked-", dir=work)
         embedded = tempfile.mkdtemp(prefix="embedded-", dir=work)
-        planned = steps.plan(request.file_path, document, request.file_type or "", unpacked, embedded, limit)
+        sbom = os.path.join(work, SBOM_NAME)
+        planned = steps.plan(request.file_path, document, request.file_type or "", unpacked, embedded, sbom, limit)
         budget = runner.steps_budget(timeout, elapsed, len(planned))
         if budget is None:
             return steps.outcome({}, planned, steps.NO_TIME)

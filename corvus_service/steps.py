@@ -1,5 +1,5 @@
-"""The corvus calls made after corvus batch --file, in one session: the file's packing and toolchain facts and
-the files Corvus writes out."""
+"""The corvus calls made after corvus batch --file, in one session: the file's packing and toolchain facts, the
+files Corvus writes out and its SBOM."""
 
 import json
 import os
@@ -8,6 +8,7 @@ from typing import Any, Dict, List, NamedTuple, Optional, Tuple
 FACTS = "facts"
 UNPACK = "unpack"
 EMBEDDED = "embedded"
+SBOM = "sbom"
 
 # Packer finding kinds that name a tool; a "suspicious" finding names none.
 PACKER_KINDS = ("packing tool", "hardening tool")
@@ -31,13 +32,14 @@ class Fact(NamedTuple):
 
 
 class Outcome(NamedTuple):
-    """What the steps read and wrote: facts, files to add, lines naming files past Corvus's page limit, and one
-    line per step that did not finish."""
+    """What the steps read and wrote: facts, files to add, lines naming files past Corvus's page limit, one line
+    per step that did not finish, and the SBOM's path (None when none was written)."""
 
     facts: List[Fact]
     files: List[Extracted]
     unlisted: List[str]
     unread: List[str]
+    sbom: Optional[str]
 
 
 def _summary(document: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
@@ -53,7 +55,7 @@ def _summary(document: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
     return summary, container
 
 
-def plan(path: str, document: Dict[str, Any], file_type: str, unpacked: str, embedded: str,
+def plan(path: str, document: Dict[str, Any], file_type: str, unpacked: str, embedded: str, sbom: str,
          limit: int) -> List[Tuple[str, Dict[str, Any]]]:
     """Returns the named steps that apply to the file, as corvus batch step records; the facts step always
     applies."""
@@ -67,6 +69,9 @@ def plan(path: str, document: Dict[str, Any], file_type: str, unpacked: str, emb
     if managed:
         planned.append((EMBEDDED, {"tool": "extract_embedded", "args": {
             "path": path, "save": True, "outputDirectory": embedded, "limit": limit}}))
+    if "dependencies" in (summary.get("views") or []):
+        planned.append((SBOM, {"tool": "summarize_file", "args": {
+            "path": path, "view": "dependencies", "sbomPath": sbom, "overwrite": True}}))
     return planned
 
 
@@ -179,13 +184,14 @@ NO_TIME = "no time was left after corvus batch --file"
 
 def outcome(lines: Dict[str, Dict[str, Any]], planned: List[Tuple[str, Dict[str, Any]]],
             missing: str = NO_OUTPUT) -> Outcome:
-    """Returns the facts, the files the steps wrote that exist on disk, the rows past the page limit, and one line
-    per step that wrote no output, named with missing, or reported an error."""
+    """Returns the facts, the files the steps wrote that exist on disk, the rows past the page limit, one line per
+    step that wrote no output, named with missing, or reported an error, and the SBOM when it was written."""
     found: List[Fact] = []
+    sbom: Optional[str] = None
     files: List[Extracted] = []
     unlisted: List[str] = []
     unread: List[str] = []
-    for name, _ in planned:
+    for name, step in planned:
         line = lines.get(name)
         if line is None:
             unread.append(f"{name}: not run; {missing}")
@@ -197,7 +203,12 @@ def outcome(lines: Dict[str, Dict[str, Any]], planned: List[Tuple[str, Dict[str,
         if name == FACTS:
             found = facts(line)
             continue
+        if name == SBOM:
+            sbom = step["args"]["sbomPath"] if os.path.isfile(step["args"]["sbomPath"]) else None
+            if sbom is None:
+                unread.append(f"{name}: no file; corvus reported no error and wrote no SBOM")
+            continue
         written = _members(line) if name == UNPACK else _payloads(line)
         files += [f for f in written if os.path.isfile(f.path)]
         unlisted += _past_limit(name, line)
-    return Outcome(found, files, unlisted, unread)
+    return Outcome(found, files, unlisted, unread, sbom)
