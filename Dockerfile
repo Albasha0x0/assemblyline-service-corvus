@@ -7,8 +7,8 @@ ENV CORVUS_PATH=/opt/corvus/corvus \
     CORVUS_DATA_DIR=/tmp/corvus-data
 
 # The Corvus release and its linux-x64 archive's SHA-256; both change together.
-ARG CORVUS_VERSION=2.7.3
-ARG CORVUS_SHA256=a31783775bebb41b77e72542dfd8fc4e02f8420cfdb2a6895691d8881292033f
+ARG CORVUS_VERSION=2.8.0
+ARG CORVUS_SHA256=a0ae45539fe0b401567b0da53eb97a00bc7be96fc922e1b2c6db57e4a1fde940
 USER root
 COPY scripts/install_corvus.py /tmp/install_corvus.py
 RUN python3 -I /tmp/install_corvus.py --version "$CORVUS_VERSION" --sha256 "$CORVUS_SHA256" --dest /opt/corvus && \
